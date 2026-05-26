@@ -1,0 +1,7 @@
+﻿check_item,value,status
+row_count,5169,info
+missing_value_count,571,warning
+duplicate_key_count,0,ok
+missing_source_url_count,0,ok
+country_count,14,info
+indicator_count,10,info
