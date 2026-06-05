@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-06-05 15:57:19",
+  "data_files": {
+    "worldbank_raw": "C:\\Users\\admin\\Desktop\\2026 数据要素大赛\\代码\\macrohub_platform_full\\data_raw\\worldbank_raw.csv",
+    "imf_standardized": "C:\\Users\\admin\\Desktop\\2026 数据要素大赛\\代码\\macrohub_platform_full\\data_raw\\imf\\imf_standardized.csv",
+    "fred_raw": "C:\\Users\\admin\\Desktop\\2026 数据要素大赛\\代码\\macrohub_platform_full\\data_raw\\fred_raw.csv",
+    "macro_observations": "C:\\Users\\admin\\Desktop\\2026 数据要素大赛\\代码\\macrohub_platform_full\\data_clean\\macro_observations.csv",
+    "macrohub_db": "C:\\Users\\admin\\Desktop\\2026 数据要素大赛\\代码\\macrohub_platform_full\\data_clean\\macrohub.db"
+  },
+  "notes": [
+    "World Bank requests use local JSON cache unless --force-refresh is set.",
+    "FRED requests use local CSV cache unless --force-refresh is set.",
+    "IMF WEO is transformed from the local data_raw/imf/imf_weo.csv file."
+  ]
+}

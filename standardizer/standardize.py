@@ -17,6 +17,7 @@ def build_indicator_master() -> pd.DataFrame:
             "frequency": meta["frequency"],
             "seasonal_adjustment": meta["seasonal_adjustment"],
             "calculation": meta["calculation"],
+            "source_count": len(meta.get("sources", [])),
         })
     df = pd.DataFrame(rows)
     df.to_csv(METADATA_DIR / "indicator_master.csv", index=False, encoding="utf-8-sig")
@@ -70,7 +71,8 @@ def standardize_worldbank() -> pd.DataFrame:
         "series_id", "country_code", "country_iso2", "country_iso3", "country_name_zh", "country_name_en",
         "indicator_code", "indicator_name_zh", "indicator_name_en", "date", "frequency", "unit",
         "seasonal_adjustment", "calculation", "value", "source_organization", "source_dataset",
-        "source_indicator_code", "source_indicator_name", "source_url", "last_updated", "status", "retrieved_at"
+        "source_indicator_code", "source_indicator_name", "source_url", "last_updated", "status", "retrieved_at",
+        "data_version"
     ]
     for c in cols:
         if c not in df.columns:

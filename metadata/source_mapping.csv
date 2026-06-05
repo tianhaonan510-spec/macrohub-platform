@@ -1,11 +1,20 @@
 ﻿source,source_dataset,source_indicator_code,indicator_code
 World Bank,World Development Indicators,NY.GDP.MKTP.CD,GDP_NOMINAL_USD_A
 World Bank,World Development Indicators,NY.GDP.MKTP.KD.ZG,GDP_REAL_GROWTH_YOY_A
+IMF,World Economic Outlook,NGDP_RPCH,GDP_REAL_GROWTH_YOY_A
 World Bank,World Development Indicators,NY.GDP.PCAP.CD,GDP_PER_CAPITA_USD_A
 World Bank,World Development Indicators,FP.CPI.TOTL.ZG,CPI_YOY_A
+IMF,World Economic Outlook,PCPIPCH,CPI_YOY_A
 World Bank,World Development Indicators,SL.UEM.TOTL.ZS,UNEMPLOYMENT_RATE_A
+IMF,World Economic Outlook,LUR,UNEMPLOYMENT_RATE_A
 World Bank,World Development Indicators,NE.EXP.GNFS.CD,EXPORTS_USD_A
 World Bank,World Development Indicators,NE.IMP.GNFS.CD,IMPORTS_USD_A
 World Bank,World Development Indicators,FI.RES.TOTL.CD,RESERVES_USD_A
 World Bank,World Development Indicators,GC.DOD.TOTL.GD.ZS,GOV_DEBT_GDP_A
+IMF,World Economic Outlook,GGXWDG_NGDP,GOV_DEBT_GDP_A
 World Bank,World Development Indicators,BN.CAB.XOKA.GD.ZS,CURRENT_ACCOUNT_GDP_A
+IMF,World Economic Outlook,BCA_NGDPD,CURRENT_ACCOUNT_GDP_A
+FRED,Federal Reserve Economic Data,CPIAUCSL,US_CPI_INDEX_M
+FRED,Federal Reserve Economic Data,UNRATE,US_UNEMPLOYMENT_RATE_M
+FRED,Federal Reserve Economic Data,INDPRO,US_INDUSTRIAL_PRODUCTION_M
+FRED,Federal Reserve Economic Data,FEDFUNDS,US_FED_FUNDS_RATE_M

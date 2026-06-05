@@ -1,11 +1,15 @@
-﻿indicator_code,indicator_name_zh,indicator_name_en,unit,frequency,seasonal_adjustment,calculation
-GDP_NOMINAL_USD_A,名义GDP,Nominal GDP,current USD,A,NSA,level
-GDP_REAL_GROWTH_YOY_A,实际GDP增速,Real GDP Growth,%,A,NSA,YoY
-GDP_PER_CAPITA_USD_A,人均GDP,GDP per capita,current USD,A,NSA,level
-CPI_YOY_A,居民消费价格指数同比,Consumer Price Index YoY,%,A,NSA,YoY
-UNEMPLOYMENT_RATE_A,失业率,Unemployment Rate,% of labor force,A,NSA,level
-EXPORTS_USD_A,货物和服务出口,Exports of goods and services,current USD,A,NSA,level
-IMPORTS_USD_A,货物和服务进口,Imports of goods and services,current USD,A,NSA,level
-RESERVES_USD_A,外汇储备,Total reserves,current USD,A,NSA,level
-GOV_DEBT_GDP_A,政府债务占GDP比重,"Central government debt, total",% of GDP,A,NSA,level
-CURRENT_ACCOUNT_GDP_A,经常账户余额占GDP比重,Current account balance,% of GDP,A,NSA,level
+﻿indicator_code,indicator_name_zh,indicator_name_en,unit,frequency,seasonal_adjustment,calculation,source_count
+GDP_NOMINAL_USD_A,名义GDP,Nominal GDP,current USD,A,NSA,level,1
+GDP_REAL_GROWTH_YOY_A,实际GDP增速,Real GDP Growth,%,A,NSA,YoY,2
+GDP_PER_CAPITA_USD_A,人均GDP,GDP per capita,current USD,A,NSA,level,1
+CPI_YOY_A,居民消费价格指数同比,Consumer Price Index YoY,%,A,NSA,YoY,2
+UNEMPLOYMENT_RATE_A,失业率,Unemployment Rate,% of labor force,A,NSA,level,2
+EXPORTS_USD_A,货物和服务出口,Exports of goods and services,current USD,A,NSA,level,1
+IMPORTS_USD_A,货物和服务进口,Imports of goods and services,current USD,A,NSA,level,1
+RESERVES_USD_A,外汇储备,Total reserves,current USD,A,NSA,level,1
+GOV_DEBT_GDP_A,政府债务占GDP比重,"Central government debt, total",% of GDP,A,NSA,level,2
+CURRENT_ACCOUNT_GDP_A,经常账户余额占GDP比重,Current account balance,% of GDP,A,NSA,level,2
+US_CPI_INDEX_M,美国居民消费价格指数,U.S. Consumer Price Index,index 1982-1984=100,M,SA,level,1
+US_UNEMPLOYMENT_RATE_M,美国失业率,U.S. Unemployment Rate,%,M,SA,level,1
+US_INDUSTRIAL_PRODUCTION_M,美国工业生产指数,U.S. Industrial Production Index,index 2017=100,M,SA,level,1
+US_FED_FUNDS_RATE_M,美国联邦基金有效利率,U.S. Effective Federal Funds Rate,%,M,NSA,level,1

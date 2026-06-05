@@ -1,168 +1,132 @@
-# import argparse
-# from collectors.worldbank_collector import collect_worldbank
-# from standardizer.standardize import standardize_worldbank, build_indicator_master, build_source_mapping, build_country_master
-# from quality.check_quality import run_quality_checks
-# from storage.database import init_db
-#
-# def run_all():
-#     print("Step 1/5: 构建元数据字典")
-#     build_indicator_master(); build_source_mapping(); build_country_master()
-#     print("Step 2/5: 采集 World Bank 数据")
-#     collect_worldbank()
-#     print("Step 3/5: 标准化处理")
-#     standardize_worldbank()
-#     print("Step 4/5: 数据质量检查")
-#     run_quality_checks()
-#     print("Step 5/5: SQLite 入库")
-#     init_db()
-#     print("全部完成。下一步运行：uvicorn api_service.app:app --reload")
-#
-# if __name__ == "__main__":
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument("--collect-only", action="store_true", help="只采集 World Bank 原始数据")
-#     parser.add_argument("--standardize-only", action="store_true", help="只做标准化")
-#     parser.add_argument("--quality-only", action="store_true", help="只做质量检查")
-#     parser.add_argument("--db-only", action="store_true", help="只入库")
-#     args = parser.parse_args()
-#     if args.collect_only:
-#         collect_worldbank()
-#     elif args.standardize_only:
-#         standardize_worldbank()
-#     elif args.quality_only:
-#         run_quality_checks()
-#     elif args.db_only:
-#         init_db()
-#     else:
-#         run_all()
-
-
-
-
-
-
 # -*- coding: utf-8 -*-
-"""
-MacroHub 数据采集与入库主程序
-"""
-
 import argparse
+import json
+from datetime import datetime
+
 import pandas as pd
 
-from config import DATA_RAW, DATA_CLEAN
+from collectors.fred_collector import collect_fred
 from collectors.worldbank_collector import collect_worldbank
-from standardizer.standardize import standardize_worldbank
+from config import DATA_CLEAN, DATA_RAW, METADATA_DIR
 from quality.check_quality import run_quality_checks
+from standardizer.standardize import standardize_worldbank
 from storage.database import init_db
 
 
-def merge_imf_data():
-    main_file = DATA_CLEAN / "macro_observations.csv"
-    imf_file = DATA_RAW / "imf" / "imf_standardized.csv"
-
-    if not main_file.exists():
-        raise FileNotFoundError(f"未找到主数据文件：{main_file}")
-
+def _align_to_main_schema(main_file, extra_file):
     df_main = pd.read_csv(main_file, encoding="utf-8-sig")
-
-    if not imf_file.exists():
-        print("[Merge] 未发现 IMF 标准化文件，跳过 IMF 合并。")
+    if not extra_file.exists():
+        print(f"[Merge] skip missing file: {extra_file}")
         return df_main
 
-    df_imf = pd.read_csv(imf_file, encoding="utf-8-sig")
-
-    print(f"[Merge] 主表 rows={len(df_main)}")
-    print(f"[Merge] IMF rows={len(df_imf)}")
-
+    df_extra = pd.read_csv(extra_file, encoding="utf-8-sig")
     for col in df_main.columns:
-        if col not in df_imf.columns:
-            df_imf[col] = None
+        if col not in df_extra.columns:
+            df_extra[col] = None
+    df_extra = df_extra[df_main.columns]
+    return pd.concat([df_main, df_extra], ignore_index=True)
 
-    df_imf = df_imf[df_main.columns]
 
-    df_all = pd.concat([df_main, df_imf], ignore_index=True)
+def merge_standardized_sources():
+    main_file = DATA_CLEAN / "macro_observations.csv"
+    if not main_file.exists():
+        raise FileNotFoundError(f"Standardized main data not found: {main_file}")
 
-    df_all = df_all.drop_duplicates(
-        subset=[
-            "country_code",
-            "indicator_code",
-            "date",
-            "source_organization",
-            "source_dataset"
-        ],
-        keep="last"
-    )
+    df_all = _align_to_main_schema(main_file, DATA_RAW / "imf" / "imf_standardized.csv")
+    temp_file = DATA_CLEAN / "_macro_observations_with_imf.csv"
+    df_all.to_csv(temp_file, index=False, encoding="utf-8-sig")
+    df_all = _align_to_main_schema(temp_file, DATA_RAW / "fred_raw.csv")
+    temp_file.unlink(missing_ok=True)
 
-    df_all = df_all.sort_values([
-        "source_organization",
-        "country_code",
-        "indicator_code",
-        "date"
-    ])
-
+    key_cols = ["country_code", "indicator_code", "date", "source_organization", "source_dataset"]
+    df_all = df_all.drop_duplicates(subset=key_cols, keep="last")
+    df_all = df_all.sort_values(["source_organization", "country_code", "indicator_code", "date"])
     df_all.to_csv(main_file, index=False, encoding="utf-8-sig")
-
-    print(f"[Merge] 合并后 rows={len(df_all)}")
-    print(f"[Merge] saved: {main_file}")
-
+    print(f"[Merge] merged standardized sources: rows={len(df_all)}")
     return df_all
 
 
-def run_full_pipeline():
-    print("Step 1/5: World Bank 数据采集")
-    collect_worldbank()
+def write_run_manifest():
+    manifest = {
+        "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "data_files": {
+            "worldbank_raw": str(DATA_RAW / "worldbank_raw.csv"),
+            "imf_standardized": str(DATA_RAW / "imf" / "imf_standardized.csv"),
+            "fred_raw": str(DATA_RAW / "fred_raw.csv"),
+            "macro_observations": str(DATA_CLEAN / "macro_observations.csv"),
+            "macrohub_db": str(DATA_CLEAN / "macrohub.db"),
+        },
+        "notes": [
+            "World Bank requests use local JSON cache unless --force-refresh is set.",
+            "FRED requests use local CSV cache unless --force-refresh is set.",
+            "IMF WEO is transformed from the local data_raw/imf/imf_weo.csv file.",
+        ],
+    }
+    METADATA_DIR.mkdir(parents=True, exist_ok=True)
+    out = METADATA_DIR / "run_manifest.json"
+    out.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[Manifest] saved: {out}")
 
-    print("Step 2/5: World Bank 标准化")
+
+def run_full_pipeline(force_refresh: bool = False, skip_fred: bool = False):
+    print("Step 1/7: collect World Bank data")
+    collect_worldbank(force_refresh=force_refresh)
+
+    print("Step 2/7: standardize World Bank data")
     standardize_worldbank()
 
-    print("Step 3/5: 合并 IMF 数据")
-    merge_imf_data()
+    if not skip_fred:
+        print("Step 3/7: collect monthly FRED data")
+        collect_fred(force_refresh=force_refresh)
+    else:
+        print("Step 3/7: skip FRED collection")
 
-    print("Step 4/5: 数据质量检查")
+    print("Step 4/7: merge IMF and FRED data")
+    merge_standardized_sources()
+
+    print("Step 5/7: run quality checks")
     run_quality_checks()
 
-    print("Step 5/5: SQLite 入库")
+    print("Step 6/7: initialize SQLite database")
     init_db()
 
-    print("全部完成。")
+    print("Step 7/7: write run manifest")
+    write_run_manifest()
+
+    print("Pipeline complete.")
 
 
-def run_merge_imf_only():
-    print("Step 1/3: 合并 IMF 数据")
-    merge_imf_data()
-
-    print("Step 2/3: 数据质量检查")
+def run_merge_only():
+    merge_standardized_sources()
     run_quality_checks()
-
-    print("Step 3/3: SQLite 入库")
     init_db()
-
-    print("IMF 合并与入库完成。请刷新 Streamlit 页面查看。")
+    write_run_manifest()
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="MacroHub 数据采集、标准化、合并与入库主程序"
-    )
-
+    parser = argparse.ArgumentParser(description="MacroHub data collection, standardization, merge and DB loader")
     parser.add_argument("--collect-only", action="store_true")
     parser.add_argument("--standardize-only", action="store_true")
-    parser.add_argument("--merge-imf-only", action="store_true")
-
+    parser.add_argument("--fred-only", action="store_true")
+    parser.add_argument("--merge-only", action="store_true")
+    parser.add_argument("--force-refresh", action="store_true", help="Ignore local source caches and download again")
+    parser.add_argument("--skip-fred", action="store_true", help="Skip FRED monthly data collection")
     args = parser.parse_args()
 
     if args.collect_only:
-        collect_worldbank()
+        collect_worldbank(force_refresh=args.force_refresh)
         return
-
     if args.standardize_only:
         standardize_worldbank()
         return
-
-    if args.merge_imf_only:
-        run_merge_imf_only()
+    if args.fred_only:
+        collect_fred(force_refresh=args.force_refresh)
+        return
+    if args.merge_only:
+        run_merge_only()
         return
 
-    run_full_pipeline()
+    run_full_pipeline(force_refresh=args.force_refresh, skip_fred=args.skip_fred)
 
 
 if __name__ == "__main__":
