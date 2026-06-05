@@ -14,6 +14,9 @@ World Bank,World Development Indicators,GC.DOD.TOTL.GD.ZS,GOV_DEBT_GDP_A
 IMF,World Economic Outlook,GGXWDG_NGDP,GOV_DEBT_GDP_A
 World Bank,World Development Indicators,BN.CAB.XOKA.GD.ZS,CURRENT_ACCOUNT_GDP_A
 IMF,World Economic Outlook,BCA_NGDPD,CURRENT_ACCOUNT_GDP_A
+OECD,Prices: Consumer prices,DF_PRICES_ALL.CPI.GY,CPI_YOY_M
+Eurostat,HICP monthly annual rate of change,prc_hicp_manr.CP00,CPI_YOY_M
+ECB,Euro foreign exchange reference rates,EXR.D.USD.EUR.SP00.A,EUR_USD_EXCHANGE_RATE_D
 FRED,Federal Reserve Economic Data,CPIAUCSL,US_CPI_INDEX_M
 FRED,Federal Reserve Economic Data,UNRATE,US_UNEMPLOYMENT_RATE_M
 FRED,Federal Reserve Economic Data,INDPRO,US_INDUSTRIAL_PRODUCTION_M

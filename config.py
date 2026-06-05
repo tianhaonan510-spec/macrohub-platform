@@ -26,6 +26,10 @@ COUNTRIES = {
     "TR": {"iso2": "TR", "iso3": "TUR", "zh": "土耳其", "en": "Turkiye"},
     "AR": {"iso2": "AR", "iso3": "ARG", "zh": "阿根廷", "en": "Argentina"},
     "SA": {"iso2": "SA", "iso3": "SAU", "zh": "沙特阿拉伯", "en": "Saudi Arabia"},
+    "FR": {"iso2": "FR", "iso3": "FRA", "zh": "法国", "en": "France"},
+    "IT": {"iso2": "IT", "iso3": "ITA", "zh": "意大利", "en": "Italy"},
+    "ES": {"iso2": "ES", "iso3": "ESP", "zh": "西班牙", "en": "Spain"},
+    "EA": {"iso2": "EA", "iso3": "EA20", "zh": "欧元区", "en": "Euro area"},
 }
 
 IMF_WEO_MAPPING = {
@@ -69,6 +73,48 @@ FRED_SERIES = {
         "calculation": "level",
         "seasonal_adjustment": "NSA",
     },
+}
+
+OECD_SERIES = {
+    "CPI_YOY_M": {
+        "url": "https://sdmx.oecd.org/public/rest/v1/data/OECD.SDD.TPS,DSD_PRICES@DF_PRICES_ALL/.M.N.CPI.PA._T.N.GY?startPeriod=2015-01&dimensionAtObservation=AllDimensions",
+        "indicator_name_zh": "居民消费价格指数同比",
+        "indicator_name_en": "Consumer Price Index YoY",
+        "unit": "%",
+        "frequency": "M",
+        "seasonal_adjustment": "NSA",
+        "calculation": "YoY",
+        "source_series_code": "DF_PRICES_ALL.CPI.GY",
+    }
+}
+
+EUROSTAT_SERIES = {
+    "CPI_YOY_M": {
+        "dataset": "prc_hicp_manr",
+        "params": {"coicop": "CP00"},
+        "geos": ["EA20", "DE", "FR", "IT", "ES"],
+        "indicator_name_zh": "调和居民消费价格指数同比",
+        "indicator_name_en": "HICP annual rate of change",
+        "unit": "%",
+        "frequency": "M",
+        "seasonal_adjustment": "NSA",
+        "calculation": "YoY",
+        "source_series_code": "prc_hicp_manr.CP00",
+    }
+}
+
+ECB_SERIES = {
+    "EUR_USD_EXCHANGE_RATE_D": {
+        "flow": "EXR",
+        "key": "D.USD.EUR.SP00.A",
+        "indicator_name_zh": "欧元兑美元参考汇率",
+        "indicator_name_en": "Euro foreign exchange reference rate: USD",
+        "unit": "USD per EUR",
+        "frequency": "D",
+        "seasonal_adjustment": "NSA",
+        "calculation": "level",
+        "source_series_code": "EXR.D.USD.EUR.SP00.A",
+    }
 }
 
 INDICATOR_MAP = {
@@ -185,6 +231,29 @@ INDICATOR_MAP = {
         "sources": [
             {"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "BN.CAB.XOKA.GD.ZS"},
             {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "BCA_NGDPD"},
+        ],
+    },
+    "CPI_YOY_M": {
+        "indicator_name_zh": "居民消费价格指数同比",
+        "indicator_name_en": "Consumer Price Index YoY",
+        "unit": "%",
+        "frequency": "M",
+        "seasonal_adjustment": "NSA",
+        "calculation": "YoY",
+        "sources": [
+            {"organization": "OECD", "dataset": "Prices: Consumer prices", "source_series_code": "DF_PRICES_ALL.CPI.GY"},
+            {"organization": "Eurostat", "dataset": "HICP monthly annual rate of change", "source_series_code": "prc_hicp_manr.CP00"},
+        ],
+    },
+    "EUR_USD_EXCHANGE_RATE_D": {
+        "indicator_name_zh": "欧元兑美元参考汇率",
+        "indicator_name_en": "Euro foreign exchange reference rate: USD",
+        "unit": "USD per EUR",
+        "frequency": "D",
+        "seasonal_adjustment": "NSA",
+        "calculation": "level",
+        "sources": [
+            {"organization": "ECB", "dataset": "Euro foreign exchange reference rates", "source_series_code": "EXR.D.USD.EUR.SP00.A"},
         ],
     },
 }

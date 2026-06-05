@@ -9,6 +9,8 @@ IMPORTS_USD_A,货物和服务进口,Imports of goods and services,current USD,A,
 RESERVES_USD_A,外汇储备,Total reserves,current USD,A,NSA,level,1
 GOV_DEBT_GDP_A,政府债务占GDP比重,"Central government debt, total",% of GDP,A,NSA,level,2
 CURRENT_ACCOUNT_GDP_A,经常账户余额占GDP比重,Current account balance,% of GDP,A,NSA,level,2
+CPI_YOY_M,居民消费价格指数同比,Consumer Price Index YoY,%,M,NSA,YoY,2
+EUR_USD_EXCHANGE_RATE_D,欧元兑美元参考汇率,Euro foreign exchange reference rate: USD,USD per EUR,D,NSA,level,1
 US_CPI_INDEX_M,美国居民消费价格指数,U.S. Consumer Price Index,index 1982-1984=100,M,SA,level,1
 US_UNEMPLOYMENT_RATE_M,美国失业率,U.S. Unemployment Rate,%,M,SA,level,1
 US_INDUSTRIAL_PRODUCTION_M,美国工业生产指数,U.S. Industrial Production Index,index 2017=100,M,SA,level,1

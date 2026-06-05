@@ -5,7 +5,10 @@ from datetime import datetime
 
 import pandas as pd
 
+from collectors.ecb_collector import collect_ecb
+from collectors.eurostat_collector import collect_eurostat
 from collectors.fred_collector import collect_fred
+from collectors.oecd_collector import collect_oecd
 from collectors.worldbank_collector import collect_worldbank
 from config import DATA_CLEAN, DATA_RAW, METADATA_DIR
 from quality.check_quality import run_quality_checks
@@ -35,7 +38,15 @@ def merge_standardized_sources():
     df_all = _align_to_main_schema(main_file, DATA_RAW / "imf" / "imf_standardized.csv")
     temp_file = DATA_CLEAN / "_macro_observations_with_imf.csv"
     df_all.to_csv(temp_file, index=False, encoding="utf-8-sig")
-    df_all = _align_to_main_schema(temp_file, DATA_RAW / "fred_raw.csv")
+    extra_files = [
+        DATA_RAW / "fred_raw.csv",
+        DATA_RAW / "oecd_raw.csv",
+        DATA_RAW / "eurostat_raw.csv",
+        DATA_RAW / "ecb_raw.csv",
+    ]
+    for extra_file in extra_files:
+        df_all = _align_to_main_schema(temp_file, extra_file)
+        df_all.to_csv(temp_file, index=False, encoding="utf-8-sig")
     temp_file.unlink(missing_ok=True)
 
     key_cols = ["country_code", "indicator_code", "date", "source_organization", "source_dataset"]
@@ -53,12 +64,18 @@ def write_run_manifest():
             "worldbank_raw": str(DATA_RAW / "worldbank_raw.csv"),
             "imf_standardized": str(DATA_RAW / "imf" / "imf_standardized.csv"),
             "fred_raw": str(DATA_RAW / "fred_raw.csv"),
+            "oecd_raw": str(DATA_RAW / "oecd_raw.csv"),
+            "eurostat_raw": str(DATA_RAW / "eurostat_raw.csv"),
+            "ecb_raw": str(DATA_RAW / "ecb_raw.csv"),
             "macro_observations": str(DATA_CLEAN / "macro_observations.csv"),
             "macrohub_db": str(DATA_CLEAN / "macrohub.db"),
         },
         "notes": [
             "World Bank requests use local JSON cache unless --force-refresh is set.",
             "FRED requests use local CSV cache unless --force-refresh is set.",
+            "OECD requests use local CSV cache unless --force-refresh is set.",
+            "Eurostat requests use local JSON cache unless --force-refresh is set.",
+            "ECB requests use local CSV cache unless --force-refresh is set.",
             "IMF WEO is transformed from the local data_raw/imf/imf_weo.csv file.",
         ],
     }
@@ -68,29 +85,39 @@ def write_run_manifest():
     print(f"[Manifest] saved: {out}")
 
 
-def run_full_pipeline(force_refresh: bool = False, skip_fred: bool = False):
-    print("Step 1/7: collect World Bank data")
+def run_full_pipeline(force_refresh: bool = False, skip_fred: bool = False, skip_extended: bool = False):
+    print("Step 1/10: collect World Bank data")
     collect_worldbank(force_refresh=force_refresh)
 
-    print("Step 2/7: standardize World Bank data")
+    print("Step 2/10: standardize World Bank data")
     standardize_worldbank()
 
     if not skip_fred:
-        print("Step 3/7: collect monthly FRED data")
+        print("Step 3/10: collect monthly FRED data")
         collect_fred(force_refresh=force_refresh)
     else:
-        print("Step 3/7: skip FRED collection")
+        print("Step 3/10: skip FRED collection")
 
-    print("Step 4/7: merge IMF and FRED data")
+    if not skip_extended:
+        print("Step 4/10: collect OECD monthly CPI data")
+        collect_oecd(force_refresh=force_refresh)
+        print("Step 5/10: collect Eurostat HICP data")
+        collect_eurostat(force_refresh=force_refresh)
+        print("Step 6/10: collect ECB daily exchange rate data")
+        collect_ecb(force_refresh=force_refresh)
+    else:
+        print("Step 4-6/10: skip OECD/Eurostat/ECB collection")
+
+    print("Step 7/10: merge all standardized sources")
     merge_standardized_sources()
 
-    print("Step 5/7: run quality checks")
+    print("Step 8/10: run quality checks")
     run_quality_checks()
 
-    print("Step 6/7: initialize SQLite database")
+    print("Step 9/10: initialize SQLite database")
     init_db()
 
-    print("Step 7/7: write run manifest")
+    print("Step 10/10: write run manifest")
     write_run_manifest()
 
     print("Pipeline complete.")
@@ -108,9 +135,13 @@ def main():
     parser.add_argument("--collect-only", action="store_true")
     parser.add_argument("--standardize-only", action="store_true")
     parser.add_argument("--fred-only", action="store_true")
+    parser.add_argument("--oecd-only", action="store_true")
+    parser.add_argument("--eurostat-only", action="store_true")
+    parser.add_argument("--ecb-only", action="store_true")
     parser.add_argument("--merge-only", action="store_true")
     parser.add_argument("--force-refresh", action="store_true", help="Ignore local source caches and download again")
     parser.add_argument("--skip-fred", action="store_true", help="Skip FRED monthly data collection")
+    parser.add_argument("--skip-extended", action="store_true", help="Skip OECD, Eurostat and ECB collection")
     args = parser.parse_args()
 
     if args.collect_only:
@@ -122,11 +153,20 @@ def main():
     if args.fred_only:
         collect_fred(force_refresh=args.force_refresh)
         return
+    if args.oecd_only:
+        collect_oecd(force_refresh=args.force_refresh)
+        return
+    if args.eurostat_only:
+        collect_eurostat(force_refresh=args.force_refresh)
+        return
+    if args.ecb_only:
+        collect_ecb(force_refresh=args.force_refresh)
+        return
     if args.merge_only:
         run_merge_only()
         return
 
-    run_full_pipeline(force_refresh=args.force_refresh, skip_fred=args.skip_fred)
+    run_full_pipeline(force_refresh=args.force_refresh, skip_fred=args.skip_fred, skip_extended=args.skip_extended)
 
 
 if __name__ == "__main__":

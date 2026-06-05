@@ -1,6 +1,6 @@
 {
-  "request_count": 20,
-  "success_count": 20,
+  "request_count": 23,
+  "success_count": 23,
   "results": [
     {
       "request": {
@@ -3960,6 +3960,433 @@
         }
       ],
       "series_count": 2,
+      "error": null
+    },
+    {
+      "request": {
+        "country": "DE",
+        "indicator_code": "CPI_YOY_M",
+        "start_date": "2024-01",
+        "end_date": "2024-12",
+        "frequency": "M",
+        "source": null
+      },
+      "series": [
+        {
+          "series_id": "DE.CPI_YOY_M.EUROSTAT",
+          "indicator_code": "CPI_YOY_M",
+          "indicator_name_zh": "调和居民消费价格指数同比",
+          "indicator_name_en": "HICP annual rate of change",
+          "country_name_zh": "德国",
+          "country_name_en": "Germany",
+          "country_code": "DE",
+          "frequency": "M",
+          "unit": "%",
+          "seasonal_adjustment": "NSA",
+          "calculation": "YoY",
+          "source": {
+            "organization": "Eurostat",
+            "dataset": "prc_hicp_manr",
+            "source_series_code": "prc_hicp_manr.CP00",
+            "source_url": "https://ec.europa.eu/eurostat/databrowser/view/prc_hicp_manr/default/table"
+          },
+          "last_updated": "2026-02-06T23:00:00+0100",
+          "observations": [
+            {
+              "date": "2024-01",
+              "value": 3.1,
+              "status": "final",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-02-06T23:00:00+0100"
+            },
+            {
+              "date": "2024-02",
+              "value": 2.7,
+              "status": "final",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-02-06T23:00:00+0100"
+            },
+            {
+              "date": "2024-03",
+              "value": 2.3,
+              "status": "final",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-02-06T23:00:00+0100"
+            },
+            {
+              "date": "2024-04",
+              "value": 2.4,
+              "status": "final",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-02-06T23:00:00+0100"
+            },
+            {
+              "date": "2024-05",
+              "value": 2.8,
+              "status": "final",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-02-06T23:00:00+0100"
+            },
+            {
+              "date": "2024-06",
+              "value": 2.5,
+              "status": "final",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-02-06T23:00:00+0100"
+            },
+            {
+              "date": "2024-07",
+              "value": 2.6,
+              "status": "final",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-02-06T23:00:00+0100"
+            },
+            {
+              "date": "2024-08",
+              "value": 2.0,
+              "status": "final",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-02-06T23:00:00+0100"
+            },
+            {
+              "date": "2024-09",
+              "value": 1.8,
+              "status": "final",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-02-06T23:00:00+0100"
+            },
+            {
+              "date": "2024-10",
+              "value": 2.4,
+              "status": "final",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-02-06T23:00:00+0100"
+            },
+            {
+              "date": "2024-11",
+              "value": 2.4,
+              "status": "final",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-02-06T23:00:00+0100"
+            },
+            {
+              "date": "2024-12",
+              "value": 2.8,
+              "status": "final",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-02-06T23:00:00+0100"
+            }
+          ]
+        },
+        {
+          "series_id": "DE.CPI_YOY_M.OECD",
+          "indicator_code": "CPI_YOY_M",
+          "indicator_name_zh": "居民消费价格指数同比",
+          "indicator_name_en": "Consumer Price Index YoY",
+          "country_name_zh": "德国",
+          "country_name_en": "Germany",
+          "country_code": "DE",
+          "frequency": "M",
+          "unit": "%",
+          "seasonal_adjustment": "NSA",
+          "calculation": "YoY",
+          "source": {
+            "organization": "OECD",
+            "dataset": "Prices: Consumer prices",
+            "source_series_code": "DF_PRICES_ALL.CPI.GY",
+            "source_url": "https://sdmx.oecd.org/public/rest/v1/data/OECD.SDD.TPS,DSD_PRICES@DF_PRICES_ALL/.M.N.CPI.PA._T.N.GY?startPeriod=2015-01&dimensionAtObservation=AllDimensions"
+          },
+          "last_updated": "2026-06-05",
+          "observations": [
+            {
+              "date": "2024-01",
+              "value": 2.887139,
+              "status": "A",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-06-05"
+            },
+            {
+              "date": "2024-02",
+              "value": 2.517361,
+              "status": "A",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-06-05"
+            },
+            {
+              "date": "2024-03",
+              "value": 2.153316,
+              "status": "A",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-06-05"
+            },
+            {
+              "date": "2024-04",
+              "value": 2.229846,
+              "status": "A",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-06-05"
+            },
+            {
+              "date": "2024-05",
+              "value": 2.403434,
+              "status": "A",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-06-05"
+            },
+            {
+              "date": "2024-06",
+              "value": 2.226027,
+              "status": "A",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-06-05"
+            },
+            {
+              "date": "2024-07",
+              "value": 2.305722,
+              "status": "A",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-06-05"
+            },
+            {
+              "date": "2024-08",
+              "value": 1.87234,
+              "status": "A",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-06-05"
+            },
+            {
+              "date": "2024-09",
+              "value": 1.612903,
+              "status": "A",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-06-05"
+            },
+            {
+              "date": "2024-10",
+              "value": 2.037351,
+              "status": "A",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-06-05"
+            },
+            {
+              "date": "2024-11",
+              "value": 2.216539,
+              "status": "A",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-06-05"
+            },
+            {
+              "date": "2024-12",
+              "value": 2.640545,
+              "status": "A",
+              "retrieved_at": "2026-06-05 18:25:31",
+              "data_version": "2026-06-05"
+            }
+          ]
+        }
+      ],
+      "series_count": 2,
+      "error": null
+    },
+    {
+      "request": {
+        "country": "EA",
+        "indicator_code": "CPI_YOY_M",
+        "start_date": "2024-01",
+        "end_date": "2024-12",
+        "frequency": "M",
+        "source": "Eurostat"
+      },
+      "series": {
+        "series_id": "EA.CPI_YOY_M.EUROSTAT",
+        "indicator_code": "CPI_YOY_M",
+        "indicator_name_zh": "调和居民消费价格指数同比",
+        "indicator_name_en": "HICP annual rate of change",
+        "country_name_zh": "欧元区",
+        "country_name_en": "Euro area",
+        "country_code": "EA",
+        "frequency": "M",
+        "unit": "%",
+        "seasonal_adjustment": "NSA",
+        "calculation": "YoY",
+        "source": {
+          "organization": "Eurostat",
+          "dataset": "prc_hicp_manr",
+          "source_series_code": "prc_hicp_manr.CP00",
+          "source_url": "https://ec.europa.eu/eurostat/databrowser/view/prc_hicp_manr/default/table"
+        },
+        "last_updated": "2026-02-06T23:00:00+0100",
+        "observations": [
+          {
+            "date": "2024-01",
+            "value": 2.8,
+            "status": "final",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-02-06T23:00:00+0100"
+          },
+          {
+            "date": "2024-02",
+            "value": 2.6,
+            "status": "final",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-02-06T23:00:00+0100"
+          },
+          {
+            "date": "2024-03",
+            "value": 2.4,
+            "status": "final",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-02-06T23:00:00+0100"
+          },
+          {
+            "date": "2024-04",
+            "value": 2.4,
+            "status": "final",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-02-06T23:00:00+0100"
+          },
+          {
+            "date": "2024-05",
+            "value": 2.6,
+            "status": "final",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-02-06T23:00:00+0100"
+          },
+          {
+            "date": "2024-06",
+            "value": 2.5,
+            "status": "final",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-02-06T23:00:00+0100"
+          },
+          {
+            "date": "2024-07",
+            "value": 2.6,
+            "status": "final",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-02-06T23:00:00+0100"
+          },
+          {
+            "date": "2024-08",
+            "value": 2.2,
+            "status": "final",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-02-06T23:00:00+0100"
+          },
+          {
+            "date": "2024-09",
+            "value": 1.7,
+            "status": "final",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-02-06T23:00:00+0100"
+          },
+          {
+            "date": "2024-10",
+            "value": 2.0,
+            "status": "final",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-02-06T23:00:00+0100"
+          },
+          {
+            "date": "2024-11",
+            "value": 2.2,
+            "status": "final",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-02-06T23:00:00+0100"
+          },
+          {
+            "date": "2024-12",
+            "value": 2.4,
+            "status": "final",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-02-06T23:00:00+0100"
+          }
+        ]
+      },
+      "series_count": 1,
+      "error": null
+    },
+    {
+      "request": {
+        "country": "EA",
+        "indicator_code": "EUR_USD_EXCHANGE_RATE_D",
+        "start_date": "2024-01-02",
+        "end_date": "2024-01-10",
+        "frequency": "D",
+        "source": "ECB"
+      },
+      "series": {
+        "series_id": "EA.EUR_USD_EXCHANGE_RATE_D.ECB",
+        "indicator_code": "EUR_USD_EXCHANGE_RATE_D",
+        "indicator_name_zh": "欧元兑美元参考汇率",
+        "indicator_name_en": "Euro foreign exchange reference rate: USD",
+        "country_name_zh": "欧元区",
+        "country_name_en": "Euro area",
+        "country_code": "EA",
+        "frequency": "D",
+        "unit": "USD per EUR",
+        "seasonal_adjustment": "NSA",
+        "calculation": "level",
+        "source": {
+          "organization": "ECB",
+          "dataset": "Euro foreign exchange reference rates",
+          "source_series_code": "EXR.D.USD.EUR.SP00.A",
+          "source_url": "https://data.ecb.europa.eu/data/datasets/EXR/D.USD.EUR.SP00.A"
+        },
+        "last_updated": "2026-06-05",
+        "observations": [
+          {
+            "date": "2024-01-02",
+            "value": 1.0956,
+            "status": "A",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-06-05"
+          },
+          {
+            "date": "2024-01-03",
+            "value": 1.0919,
+            "status": "A",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-06-05"
+          },
+          {
+            "date": "2024-01-04",
+            "value": 1.0953,
+            "status": "A",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-06-05"
+          },
+          {
+            "date": "2024-01-05",
+            "value": 1.0921,
+            "status": "A",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-06-05"
+          },
+          {
+            "date": "2024-01-08",
+            "value": 1.0946,
+            "status": "A",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-06-05"
+          },
+          {
+            "date": "2024-01-09",
+            "value": 1.094,
+            "status": "A",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-06-05"
+          },
+          {
+            "date": "2024-01-10",
+            "value": 1.0946,
+            "status": "A",
+            "retrieved_at": "2026-06-05 18:25:31",
+            "data_version": "2026-06-05"
+          }
+        ]
+      },
+      "series_count": 1,
       "error": null
     }
   ]
