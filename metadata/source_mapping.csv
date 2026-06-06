@@ -17,7 +17,11 @@ IMF,World Economic Outlook,BCA_NGDPD,CURRENT_ACCOUNT_GDP_A
 OECD,Prices: Consumer prices,DF_PRICES_ALL.CPI.GY,CPI_YOY_M
 Eurostat,HICP monthly annual rate of change,prc_hicp_manr.CP00,CPI_YOY_M
 ECB,Euro foreign exchange reference rates,EXR.D.USD.EUR.SP00.A,EUR_USD_EXCHANGE_RATE_D
+BIS,Exchange rates,WS_XRU.D,EXCHANGE_RATE_USD_D
 FRED,Federal Reserve Economic Data,CPIAUCSL,US_CPI_INDEX_M
 FRED,Federal Reserve Economic Data,UNRATE,US_UNEMPLOYMENT_RATE_M
 FRED,Federal Reserve Economic Data,INDPRO,US_INDUSTRIAL_PRODUCTION_M
 FRED,Federal Reserve Economic Data,FEDFUNDS,US_FED_FUNDS_RATE_M
+National Bureau of Statistics of China,National Bureau of Statistics monthly data,NBS.CPI.YOY.M,CN_CPI_YOY_M
+National Bureau of Statistics of China,National Bureau of Statistics monthly data,NBS.PPI.YOY.M,CN_PPI_YOY_M
+National Bureau of Statistics of China,National Bureau of Statistics monthly data,NBS.IVA.YOY.M,CN_INDUSTRIAL_VALUE_ADDED_YOY_M

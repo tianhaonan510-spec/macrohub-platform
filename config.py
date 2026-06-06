@@ -117,6 +117,52 @@ ECB_SERIES = {
     }
 }
 
+BIS_SERIES = {
+    "EXCHANGE_RATE_USD_D": {
+        "countries": ["CN", "US", "JP", "DE", "GB", "IN", "BR", "ZA", "TR", "MX", "EA"],
+        "indicator_name_zh": "本币兑美元汇率",
+        "indicator_name_en": "Exchange rates against USD",
+        "unit": "local currency per USD",
+        "frequency": "D",
+        "seasonal_adjustment": "NSA",
+        "calculation": "level",
+        "source_series_code": "WS_XRU.D",
+    }
+}
+
+CHINA_OFFICIAL_SERIES = {
+    "CN_CPI_YOY_M": {
+        "indicator_name_zh": "中国居民消费价格指数同比",
+        "indicator_name_en": "China CPI YoY",
+        "unit": "%",
+        "frequency": "M",
+        "seasonal_adjustment": "NSA",
+        "calculation": "YoY",
+        "source_series_code": "NBS.CPI.YOY.M",
+        "source_dataset": "National Bureau of Statistics monthly data",
+    },
+    "CN_PPI_YOY_M": {
+        "indicator_name_zh": "中国工业生产者出厂价格指数同比",
+        "indicator_name_en": "China PPI YoY",
+        "unit": "%",
+        "frequency": "M",
+        "seasonal_adjustment": "NSA",
+        "calculation": "YoY",
+        "source_series_code": "NBS.PPI.YOY.M",
+        "source_dataset": "National Bureau of Statistics monthly data",
+    },
+    "CN_INDUSTRIAL_VALUE_ADDED_YOY_M": {
+        "indicator_name_zh": "中国规模以上工业增加值同比",
+        "indicator_name_en": "China industrial value added YoY",
+        "unit": "%",
+        "frequency": "M",
+        "seasonal_adjustment": "NSA",
+        "calculation": "YoY",
+        "source_series_code": "NBS.IVA.YOY.M",
+        "source_dataset": "National Bureau of Statistics monthly data",
+    },
+}
+
 INDICATOR_MAP = {
     "GDP_NOMINAL_USD_A": {
         "indicator_name_zh": "名义GDP",
@@ -256,6 +302,17 @@ INDICATOR_MAP = {
             {"organization": "ECB", "dataset": "Euro foreign exchange reference rates", "source_series_code": "EXR.D.USD.EUR.SP00.A"},
         ],
     },
+    "EXCHANGE_RATE_USD_D": {
+        "indicator_name_zh": "本币兑美元汇率",
+        "indicator_name_en": "Exchange rates against USD",
+        "unit": "local currency per USD",
+        "frequency": "D",
+        "seasonal_adjustment": "NSA",
+        "calculation": "level",
+        "sources": [
+            {"organization": "BIS", "dataset": "Exchange rates", "source_series_code": "WS_XRU.D"},
+        ],
+    },
 }
 
 for indicator_code, meta in FRED_SERIES.items():
@@ -271,6 +328,23 @@ for indicator_code, meta in FRED_SERIES.items():
                 "organization": "FRED",
                 "dataset": "Federal Reserve Economic Data",
                 "source_series_code": meta["fred_series_id"],
+            }
+        ],
+    }
+
+for indicator_code, meta in CHINA_OFFICIAL_SERIES.items():
+    INDICATOR_MAP[indicator_code] = {
+        "indicator_name_zh": meta["indicator_name_zh"],
+        "indicator_name_en": meta["indicator_name_en"],
+        "unit": meta["unit"],
+        "frequency": meta["frequency"],
+        "seasonal_adjustment": meta["seasonal_adjustment"],
+        "calculation": meta["calculation"],
+        "sources": [
+            {
+                "organization": "National Bureau of Statistics of China",
+                "dataset": meta["source_dataset"],
+                "source_series_code": meta["source_series_code"],
             }
         ],
     }

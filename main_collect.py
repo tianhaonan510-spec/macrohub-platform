@@ -5,6 +5,8 @@ from datetime import datetime
 
 import pandas as pd
 
+from collectors.bis_collector import collect_bis
+from collectors.china_official_collector import collect_china_official
 from collectors.ecb_collector import collect_ecb
 from collectors.eurostat_collector import collect_eurostat
 from collectors.fred_collector import collect_fred
@@ -43,6 +45,8 @@ def merge_standardized_sources():
         DATA_RAW / "oecd_raw.csv",
         DATA_RAW / "eurostat_raw.csv",
         DATA_RAW / "ecb_raw.csv",
+        DATA_RAW / "bis_raw.csv",
+        DATA_RAW / "china_official_raw.csv",
     ]
     for extra_file in extra_files:
         df_all = _align_to_main_schema(temp_file, extra_file)
@@ -67,6 +71,8 @@ def write_run_manifest():
             "oecd_raw": str(DATA_RAW / "oecd_raw.csv"),
             "eurostat_raw": str(DATA_RAW / "eurostat_raw.csv"),
             "ecb_raw": str(DATA_RAW / "ecb_raw.csv"),
+            "bis_raw": str(DATA_RAW / "bis_raw.csv"),
+            "china_official_raw": str(DATA_RAW / "china_official_raw.csv"),
             "macro_observations": str(DATA_CLEAN / "macro_observations.csv"),
             "macrohub_db": str(DATA_CLEAN / "macrohub.db"),
         },
@@ -76,6 +82,8 @@ def write_run_manifest():
             "OECD requests use local CSV cache unless --force-refresh is set.",
             "Eurostat requests use local JSON cache unless --force-refresh is set.",
             "ECB requests use local CSV cache unless --force-refresh is set.",
+            "BIS requests use local CSV cache unless --force-refresh is set.",
+            "China official data is imported from local CSV files in data_raw/china_official.",
             "IMF WEO is transformed from the local data_raw/imf/imf_weo.csv file.",
         ],
     }
@@ -105,19 +113,23 @@ def run_full_pipeline(force_refresh: bool = False, skip_fred: bool = False, skip
         collect_eurostat(force_refresh=force_refresh)
         print("Step 6/10: collect ECB daily exchange rate data")
         collect_ecb(force_refresh=force_refresh)
+        print("Step 7/10: collect BIS daily exchange rate data")
+        collect_bis(force_refresh=force_refresh)
+        print("Step 8/10: import China official local data")
+        collect_china_official()
     else:
-        print("Step 4-6/10: skip OECD/Eurostat/ECB collection")
+        print("Step 4-8/10: skip OECD/Eurostat/ECB/BIS/China-official collection")
 
-    print("Step 7/10: merge all standardized sources")
+    print("Step 9/12: merge all standardized sources")
     merge_standardized_sources()
 
-    print("Step 8/10: run quality checks")
+    print("Step 10/12: run quality checks")
     run_quality_checks()
 
-    print("Step 9/10: initialize SQLite database")
+    print("Step 11/12: initialize SQLite database")
     init_db()
 
-    print("Step 10/10: write run manifest")
+    print("Step 12/12: write run manifest")
     write_run_manifest()
 
     print("Pipeline complete.")
@@ -138,6 +150,8 @@ def main():
     parser.add_argument("--oecd-only", action="store_true")
     parser.add_argument("--eurostat-only", action="store_true")
     parser.add_argument("--ecb-only", action="store_true")
+    parser.add_argument("--bis-only", action="store_true")
+    parser.add_argument("--china-official-only", action="store_true")
     parser.add_argument("--merge-only", action="store_true")
     parser.add_argument("--force-refresh", action="store_true", help="Ignore local source caches and download again")
     parser.add_argument("--skip-fred", action="store_true", help="Skip FRED monthly data collection")
@@ -161,6 +175,12 @@ def main():
         return
     if args.ecb_only:
         collect_ecb(force_refresh=args.force_refresh)
+        return
+    if args.bis_only:
+        collect_bis(force_refresh=args.force_refresh)
+        return
+    if args.china_official_only:
+        collect_china_official()
         return
     if args.merge_only:
         run_merge_only()
