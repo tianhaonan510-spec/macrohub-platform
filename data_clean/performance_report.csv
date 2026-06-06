@@ -1,0 +1,6 @@
+﻿scenario,repeat,avg_ms,min_ms,max_ms,p95_ms
+annual_multi_source_query_us_cpi,30,6.241,5.565,9.276,7.063
+monthly_multi_source_query_de_cpi,30,7.233,6.892,8.643,7.802
+daily_bis_query_cn_exchange_rate,30,5.076,4.798,5.681,5.367
+metadata_sql_counts,30,45.063,41.237,67.327,58.76
+batch_query_sample_file,10,158.188,151.432,171.126,162.446
