@@ -6,13 +6,13 @@ MacroHub 面向“全球宏观经济指标数据要素采集与结构化服务�
 
 | 赛题要求 | 当前实现 |
 | --- | --- |
-| 多个权威宏观数据源 | World Bank Indicators API、IMF WEO 本地公开数据、FRED 月频公开数据 |
+| 多个权威宏观数据源 | World Bank、IMF WEO、FRED、OECD、Eurostat、ECB、BIS、中国国家统计局等 8 类来源 |
 | 统一指标命名和维度描述 | `metadata/indicator_master.csv`、`metadata/source_mapping.csv`、`metadata/country_master.csv` |
 | 按国家/指标/频率/时间查询 | CLI、`GET /query`、`POST /batch_query` |
 | 标准化 JSON 输出 | 单条查询和批量查询均输出 JSON |
 | 来源、单位、频率、季调、更新时间 | `macro_observations.csv` 中保留完整元数据 |
 | 数据质量验证 | 总览、覆盖率、多来源一致性、异常值报告 |
-| 缓存、重试、日志 | World Bank/FRED 本地缓存，requests retry，`logs/collect.log` |
+| 缓存、重试、日志 | 多个在线接口支持本地缓存与 requests retry，调度日志写入 `logs/` |
 
 ## 数据源和覆盖
 
@@ -22,8 +22,10 @@ MacroHub 面向“全球宏观经济指标数据要素采集与结构化服务�
 - OECD: 月频 CPI 同比，覆盖 OECD 与部分 G20 经济体。
 - Eurostat: 欧元区、德国、法国、意大利、西班牙 HICP 月频同比。
 - ECB: 欧元兑美元日频参考汇率。
+- BIS: 日频本币兑美元汇率，覆盖中国、美国、日本、欧元区及主要经济体。
+- 中国国家统计局: 本地官方文件导入，当前包含中国 CPI、PPI、规模以上工业增加值等月度指标样例。
 
-默认覆盖 18 个国家/地区、16 个标准指标，包含年频、月频和日频数据。
+当前标准库覆盖 8 个数据源、18 个国家/地区、20 个标准指标，包含年频、月频和日频数据，共 44,176 条观测值。
 
 ## 安装
 
@@ -60,6 +62,8 @@ python main_collect.py --merge-only
 - `data_raw/oecd_raw.csv`
 - `data_raw/eurostat_raw.csv`
 - `data_raw/ecb_raw.csv`
+- `data_raw/bis_raw.csv`
+- `data_raw/china_official_raw.csv`
 - `data_clean/macro_observations.csv`
 - `data_clean/macrohub.db`
 - `data_clean/quality_report.csv`
@@ -82,16 +86,16 @@ python query_cli.py --country US --indicator CPI_YOY_A --start 2020 --end 2024 -
 python query_cli.py --country DE --indicator CPI_YOY_M --start 2024-01 --end 2024-12 --frequency M
 ```
 
-日频 ECB 汇率查询：
+日频 BIS 中国汇率查询：
 
 ```bash
-python query_cli.py --country EA --indicator EUR_USD_EXCHANGE_RATE_D --start 2024-01-02 --end 2024-01-10 --frequency D --source ECB
+python query_cli.py --country CN --indicator EXCHANGE_RATE_USD_D --start 2024-01-02 --end 2024-01-10 --frequency D --source BIS
 ```
 
-指定来源：
+中国官方月频指标查询：
 
 ```bash
-python query_cli.py --country US --indicator CPI_YOY_A --start 2020 --end 2024 --frequency A --source IMF
+python query_cli.py --country CN --indicator CN_CPI_YOY_M --start 2024-01 --end 2024-12 --frequency M --source "National Bureau of Statistics of China"
 ```
 
 20 条批量查询：
@@ -206,6 +210,7 @@ powershell -ExecutionPolicy Bypass -File scripts/register_windows_task.ps1 -Time
 ## 已知边界
 
 - IMF WEO 当前来自本地公开 CSV，需要先放入 `data_raw/imf/imf_weo.csv`。
-- World Bank 和 FRED 在线采集依赖外部网络；无网络时可使用已有缓存和已生成的标准化数据。
+- 中国国家统计局数据采用本地官方文件导入，示例文件位于 `data_raw/china_official/nbs_2024_monthly_sample.csv`。
+- World Bank、FRED、OECD、Eurostat、ECB、BIS 在线采集依赖外部网络；无网络时可使用已有缓存和已生成的标准化数据。
 - 当前修订追踪为轻量版本，保留 `last_updated`、`retrieved_at`、`data_version` 和采集批次 manifest，尚未保存每次历史修订快照。
 
