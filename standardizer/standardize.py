@@ -1,4 +1,4 @@
-from datetime import datetime
+﻿from datetime import datetime
 import pandas as pd
 
 from config import DATA_RAW, DATA_CLEAN, METADATA_DIR, INDICATOR_MAP, COUNTRIES
@@ -60,6 +60,7 @@ def standardize_worldbank() -> pd.DataFrame:
     source_mapping = build_source_mapping()
     country_master = build_country_master()
     df = raw.merge(source_mapping, on=["source_indicator_code", "source_dataset"], how="left")
+    df = df[df["indicator_code"].notna()].copy()
     df = df.merge(indicator_master, on="indicator_code", how="left")
     df = df.merge(country_master, on="country_code", how="left")
     df["date"] = df["date"].astype(str)
@@ -85,3 +86,4 @@ def standardize_worldbank() -> pd.DataFrame:
 
 if __name__ == "__main__":
     standardize_worldbank()
+

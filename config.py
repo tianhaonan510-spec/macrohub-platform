@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_RAW = BASE_DIR / "data_raw"
@@ -315,6 +315,190 @@ INDICATOR_MAP = {
     },
 }
 
+
+# Expanded macro indicator mappings. These entries keep the project focused on
+# multi-source alignment first, then add single-source coverage for broader
+# macroeconomic use cases.
+IMF_WEO_MAPPING.update({
+    "NGDPD": "GDP_NOMINAL_USD_A",
+    "NGDPDPC": "GDP_PER_CAPITA_USD_A",
+    "NGDP": "GDP_CURRENT_LCU_A",
+    "NGDP_R": "GDP_REAL_LCU_A",
+    "NGDP_D": "GDP_DEFLATOR_INDEX_A",
+    "NGSD_NGDP": "GROSS_SAVINGS_GDP_A",
+    "NID_NGDP": "GROSS_CAPITAL_FORMATION_GDP_A",
+    "GGR_NGDP": "GOV_REVENUE_GDP_A",
+    "GGX_NGDP": "GOV_EXPENSE_GDP_A",
+    "GGXCNL_NGDP": "GOV_NET_LENDING_GDP_A",
+    "NGAP_NPGDP": "OUTPUT_GAP_GDP_A",
+    "LP": "POPULATION_TOTAL_A",
+    "BX": "EXPORTS_USD_A",
+    "BM": "IMPORTS_USD_A",
+})
+
+INDICATOR_MAP["GDP_NOMINAL_USD_A"]["sources"].append(
+    {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "NGDPD"}
+)
+INDICATOR_MAP["GDP_PER_CAPITA_USD_A"]["sources"].append(
+    {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "NGDPDPC"}
+)
+INDICATOR_MAP["EXPORTS_USD_A"]["sources"].append(
+    {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "BX"}
+)
+INDICATOR_MAP["IMPORTS_USD_A"]["sources"].append(
+    {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "BM"}
+)
+
+EXPANDED_WB_IMF_INDICATORS = {
+    "GDP_CURRENT_LCU_A": {
+        "indicator_name_zh": "本币计价名义GDP",
+        "indicator_name_en": "Nominal GDP in local currency",
+        "unit": "current LCU",
+        "frequency": "A",
+        "seasonal_adjustment": "NSA",
+        "calculation": "level",
+        "sources": [
+            {"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "NY.GDP.MKTP.CN"},
+            {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "NGDP"},
+        ],
+    },
+    "GDP_REAL_LCU_A": {
+        "indicator_name_zh": "本币计价实际GDP",
+        "indicator_name_en": "Real GDP in local currency",
+        "unit": "constant LCU",
+        "frequency": "A",
+        "seasonal_adjustment": "NSA",
+        "calculation": "level",
+        "sources": [
+            {"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "NY.GDP.MKTP.KN"},
+            {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "NGDP_R"},
+        ],
+    },
+    "GDP_DEFLATOR_INDEX_A": {
+        "indicator_name_zh": "GDP平减指数",
+        "indicator_name_en": "GDP deflator index",
+        "unit": "index",
+        "frequency": "A",
+        "seasonal_adjustment": "NSA",
+        "calculation": "level",
+        "sources": [
+            {"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "NY.GDP.DEFL.ZS"},
+            {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "NGDP_D"},
+        ],
+    },
+    "GROSS_SAVINGS_GDP_A": {
+        "indicator_name_zh": "国民总储蓄占GDP比重",
+        "indicator_name_en": "Gross national savings as percent of GDP",
+        "unit": "% of GDP",
+        "frequency": "A",
+        "seasonal_adjustment": "NSA",
+        "calculation": "level",
+        "sources": [
+            {"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "NY.GNS.ICTR.ZS"},
+            {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "NGSD_NGDP"},
+        ],
+    },
+    "GROSS_CAPITAL_FORMATION_GDP_A": {
+        "indicator_name_zh": "资本形成总额占GDP比重",
+        "indicator_name_en": "Gross capital formation as percent of GDP",
+        "unit": "% of GDP",
+        "frequency": "A",
+        "seasonal_adjustment": "NSA",
+        "calculation": "level",
+        "sources": [
+            {"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "NE.GDI.TOTL.ZS"},
+            {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "NID_NGDP"},
+        ],
+    },
+    "GOV_REVENUE_GDP_A": {
+        "indicator_name_zh": "政府收入占GDP比重",
+        "indicator_name_en": "General government revenue as percent of GDP",
+        "unit": "% of GDP",
+        "frequency": "A",
+        "seasonal_adjustment": "NSA",
+        "calculation": "level",
+        "sources": [
+            {"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "GC.REV.XGRT.GD.ZS"},
+            {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "GGR_NGDP"},
+        ],
+    },
+    "GOV_EXPENSE_GDP_A": {
+        "indicator_name_zh": "政府支出占GDP比重",
+        "indicator_name_en": "General government expense as percent of GDP",
+        "unit": "% of GDP",
+        "frequency": "A",
+        "seasonal_adjustment": "NSA",
+        "calculation": "level",
+        "sources": [
+            {"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "GC.XPN.TOTL.GD.ZS"},
+            {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "GGX_NGDP"},
+        ],
+    },
+    "GOV_NET_LENDING_GDP_A": {
+        "indicator_name_zh": "政府净借贷占GDP比重",
+        "indicator_name_en": "General government net lending or borrowing as percent of GDP",
+        "unit": "% of GDP",
+        "frequency": "A",
+        "seasonal_adjustment": "NSA",
+        "calculation": "level",
+        "sources": [
+            {"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "GC.NLD.TOTL.GD.ZS"},
+            {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "GGXCNL_NGDP"},
+        ],
+    },
+    "OUTPUT_GAP_GDP_A": {
+        "indicator_name_zh": "产出缺口占潜在GDP比重",
+        "indicator_name_en": "Output gap as percent of potential GDP",
+        "unit": "% of potential GDP",
+        "frequency": "A",
+        "seasonal_adjustment": "NSA",
+        "calculation": "level",
+        "sources": [
+            {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "NGAP_NPGDP"},
+        ],
+    },
+}
+INDICATOR_MAP.update(EXPANDED_WB_IMF_INDICATORS)
+
+EXPANDED_WB_ONLY_INDICATORS = {
+    "POPULATION_TOTAL_A": {"indicator_name_zh": "总人口", "indicator_name_en": "Population, total", "unit": "persons", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "SP.POP.TOTL"}, {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "LP"}]},
+    "POPULATION_GROWTH_A": {"indicator_name_zh": "人口增长率", "indicator_name_en": "Population growth", "unit": "%", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "YoY", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "SP.POP.GROW"}]},
+    "URBAN_POPULATION_RATE_A": {"indicator_name_zh": "城镇人口比重", "indicator_name_en": "Urban population share", "unit": "% of total population", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "SP.URB.TOTL.IN.ZS"}]},
+    "GNI_CURRENT_USD_A": {"indicator_name_zh": "国民总收入", "indicator_name_en": "GNI, current US dollars", "unit": "current USD", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "NY.GNP.MKTP.CD"}]},
+    "GNI_PER_CAPITA_USD_A": {"indicator_name_zh": "人均国民总收入", "indicator_name_en": "GNI per capita", "unit": "current USD", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "NY.GNP.PCAP.CD"}]},
+    "FDI_NET_INFLOWS_GDP_A": {"indicator_name_zh": "外商直接投资净流入占GDP比重", "indicator_name_en": "FDI net inflows as percent of GDP", "unit": "% of GDP", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "BX.KLT.DINV.WD.GD.ZS"}]},
+    "TRADE_GDP_A": {"indicator_name_zh": "贸易开放度", "indicator_name_en": "Trade as percent of GDP", "unit": "% of GDP", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "NE.TRD.GNFS.ZS"}]},
+    "EXPORTS_GROWTH_A": {"indicator_name_zh": "出口实际增速", "indicator_name_en": "Exports real growth", "unit": "%", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "YoY", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "NE.EXP.GNFS.KD.ZG"}]},
+    "IMPORTS_GROWTH_A": {"indicator_name_zh": "进口实际增速", "indicator_name_en": "Imports real growth", "unit": "%", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "YoY", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "NE.IMP.GNFS.KD.ZG"}]},
+    "GDP_DEFLATOR_GROWTH_A": {"indicator_name_zh": "GDP平减指数增速", "indicator_name_en": "Inflation, GDP deflator", "unit": "%", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "YoY", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "NY.GDP.DEFL.KD.ZG"}]},
+    "BROAD_MONEY_GDP_A": {"indicator_name_zh": "广义货币占GDP比重", "indicator_name_en": "Broad money as percent of GDP", "unit": "% of GDP", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "FM.LBL.BMNY.GD.ZS"}]},
+    "DOMESTIC_CREDIT_PRIVATE_GDP_A": {"indicator_name_zh": "对私营部门国内信贷占GDP比重", "indicator_name_en": "Domestic credit to private sector as percent of GDP", "unit": "% of GDP", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "FS.AST.PRVT.GD.ZS"}]},
+    "TAX_REVENUE_GDP_A": {"indicator_name_zh": "税收收入占GDP比重", "indicator_name_en": "Tax revenue as percent of GDP", "unit": "% of GDP", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "GC.TAX.TOTL.GD.ZS"}]},
+    "MILITARY_EXPENDITURE_GDP_A": {"indicator_name_zh": "军费支出占GDP比重", "indicator_name_en": "Military expenditure as percent of GDP", "unit": "% of GDP", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "MS.MIL.XPND.GD.ZS"}]},
+    "CO2_EMISSIONS_KT_A": {"indicator_name_zh": "二氧化碳排放量", "indicator_name_en": "CO2 emissions", "unit": "kt", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "EN.ATM.CO2E.KT"}]},
+    "ENERGY_USE_PER_CAPITA_A": {"indicator_name_zh": "人均能源使用量", "indicator_name_en": "Energy use per capita", "unit": "kg of oil equivalent per capita", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "EG.USE.PCAP.KG.OE"}]},
+    "ELECTRIC_POWER_CONSUMPTION_A": {"indicator_name_zh": "人均电力消费", "indicator_name_en": "Electric power consumption per capita", "unit": "kWh per capita", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "EG.USE.ELEC.KH.PC"}]},
+    "INTERNET_USERS_RATE_A": {"indicator_name_zh": "互联网使用率", "indicator_name_en": "Individuals using the Internet", "unit": "% of population", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "IT.NET.USER.ZS"}]},
+    "LIFE_EXPECTANCY_A": {"indicator_name_zh": "预期寿命", "indicator_name_en": "Life expectancy at birth", "unit": "years", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "SP.DYN.LE00.IN"}]},
+    "SCHOOL_ENROLLMENT_TERTIARY_A": {"indicator_name_zh": "高等教育毛入学率", "indicator_name_en": "School enrollment, tertiary", "unit": "% gross", "frequency": "A", "seasonal_adjustment": "NSA", "calculation": "level", "sources": [{"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "SE.TER.ENRR"}]},
+}
+INDICATOR_MAP.update(EXPANDED_WB_ONLY_INDICATORS)
+
+
+DROP_EMPTY_EXPANDED_INDICATORS = ["OUTPUT_GAP_GDP_A", "CO2_EMISSIONS_KT_A"]
+for _indicator_code in DROP_EMPTY_EXPANDED_INDICATORS:
+    INDICATOR_MAP.pop(_indicator_code, None)
+IMF_WEO_MAPPING.pop("NGAP_NPGDP", None)
+FRED_SERIES.update({
+    "US_PPI_INDEX_M": {"fred_series_id": "PPIACO", "indicator_name_zh": "美国生产者价格指数", "indicator_name_en": "U.S. Producer Price Index", "unit": "index 1982=100", "frequency": "M", "calculation": "level", "seasonal_adjustment": "NSA"},
+    "US_CORE_CPI_INDEX_M": {"fred_series_id": "CPILFESL", "indicator_name_zh": "美国核心CPI指数", "indicator_name_en": "U.S. Core CPI Index", "unit": "index 1982-1984=100", "frequency": "M", "calculation": "level", "seasonal_adjustment": "SA"},
+    "US_RETAIL_SALES_M": {"fred_series_id": "RSAFS", "indicator_name_zh": "美国零售销售额", "indicator_name_en": "U.S. Retail Sales", "unit": "millions of dollars", "frequency": "M", "calculation": "level", "seasonal_adjustment": "SA"},
+    "US_HOUSING_STARTS_M": {"fred_series_id": "HOUST", "indicator_name_zh": "美国新屋开工", "indicator_name_en": "U.S. Housing Starts", "unit": "thousands of units", "frequency": "M", "calculation": "level", "seasonal_adjustment": "SA"},
+    "US_NONFARM_PAYROLLS_M": {"fred_series_id": "PAYEMS", "indicator_name_zh": "美国非农就业人数", "indicator_name_en": "U.S. Nonfarm Payrolls", "unit": "thousands of persons", "frequency": "M", "calculation": "level", "seasonal_adjustment": "SA"},
+    "US_M2_MONEY_STOCK_M": {"fred_series_id": "M2SL", "indicator_name_zh": "美国M2货币存量", "indicator_name_en": "U.S. M2 Money Stock", "unit": "billions of dollars", "frequency": "M", "calculation": "level", "seasonal_adjustment": "SA"},
+    "US_10Y_TREASURY_RATE_M": {"fred_series_id": "GS10", "indicator_name_zh": "美国10年期国债收益率", "indicator_name_en": "U.S. 10-Year Treasury Rate", "unit": "%", "frequency": "M", "calculation": "level", "seasonal_adjustment": "NSA"},
+    "US_2Y_TREASURY_RATE_M": {"fred_series_id": "GS2", "indicator_name_zh": "美国2年期国债收益率", "indicator_name_en": "U.S. 2-Year Treasury Rate", "unit": "%", "frequency": "M", "calculation": "level", "seasonal_adjustment": "NSA"},
+})
 for indicator_code, meta in FRED_SERIES.items():
     INDICATOR_MAP[indicator_code] = {
         "indicator_name_zh": meta["indicator_name_zh"],
@@ -348,3 +532,6 @@ for indicator_code, meta in CHINA_OFFICIAL_SERIES.items():
             }
         ],
     }
+
+
+

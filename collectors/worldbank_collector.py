@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import json
 import logging
 import time
@@ -44,7 +44,7 @@ def _load_or_fetch_json(url: str, cache_path, force_refresh: bool = False) -> An
         with open(cache_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    resp = _session().get(url, timeout=30)
+    resp = _session().get(url, timeout=15)
     resp.raise_for_status()
     payload = resp.json()
     with open(cache_path, "w", encoding="utf-8") as f:
@@ -106,7 +106,8 @@ def collect_worldbank(force_refresh: bool = False) -> pd.DataFrame:
                 all_rows.extend(rows)
                 logging.info("World Bank OK %s/%s: %s %s rows=%s", done, total, country_iso2, source_code, len(rows))
                 print(f"[WorldBank] {done}/{total} {country_iso2} {source_code}: {len(rows)} rows")
-                time.sleep(0.15)
+                if not _cache_path(country_iso2, source_code, START_YEAR, END_YEAR).exists() or force_refresh:
+                    time.sleep(0.05)
             except Exception as exc:
                 logging.exception("World Bank FAILED: %s %s: %s", country_iso2, source_code, exc)
                 print(f"[WorldBank] FAILED {country_iso2} {source_code}: {exc}")
@@ -120,3 +121,5 @@ def collect_worldbank(force_refresh: bool = False) -> pd.DataFrame:
 
 if __name__ == "__main__":
     collect_worldbank()
+
+

@@ -1,6 +1,6 @@
 ﻿scenario,repeat,avg_ms,min_ms,max_ms,p95_ms
-annual_multi_source_query_us_cpi,30,18.234,9.909,25.979,24.591
-monthly_multi_source_query_de_cpi,30,21.681,13.22,49.784,43.892
-daily_bis_query_cn_exchange_rate,30,19.159,10.254,80.769,30.501
-metadata_sql_counts,30,83.903,56.379,153.429,132.694
-batch_query_sample_file,10,355.055,275.738,476.962,447.594
+annual_multi_source_query_us_cpi,30,26.811,10.233,99.788,72.437
+monthly_multi_source_query_de_cpi,30,29.568,16.159,66.032,51.774
+daily_bis_query_cn_exchange_rate,30,20.012,13.306,43.008,27.714
+metadata_sql_counts,30,203.061,120.319,507.485,300.411
+batch_query_sample_file,10,785.208,478.004,1269.718,1044.66

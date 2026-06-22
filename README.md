@@ -6,7 +6,7 @@ MacroHub 面向“全球宏观经济指标数据要素采集与结构化服务�
 
 | 赛题要求 | 当前实现 |
 | --- | --- |
-| 多个权威宏观数据源 | World Bank、IMF WEO、FRED、OECD、Eurostat、ECB、BIS、中国国家统计局等 8 类来源 |
+| 多个权威宏观数据源 | World Bank、IMF WEO、FRED、OECD、Eurostat、ECB、BIS、中国国家统计局等 8 类来源，覆盖 55 个标准指标 |
 | 统一指标命名和维度描述 | `metadata/indicator_master.csv`、`metadata/source_mapping.csv`、`metadata/country_master.csv` |
 | 按国家/指标/频率/时间查询 | CLI、`GET /query`、`POST /batch_query` |
 | 标准化 JSON 输出 | 单条查询和批量查询均输出 JSON |
@@ -25,7 +25,7 @@ MacroHub 面向“全球宏观经济指标数据要素采集与结构化服务�
 - BIS: 日频本币兑美元汇率，覆盖中国、美国、日本、欧元区及主要经济体。
 - 中国国家统计局: 本地官方文件导入，当前包含中国 CPI、PPI、规模以上工业增加值等月度指标样例。
 
-当前标准库覆盖 8 个数据源、18 个国家/地区、20 个标准指标，包含年频、月频和日频数据，共 44,176 条观测值。
+当前标准库覆盖 8 个数据源、18 个国家/地区、55 个标准指标，包含年频、月频和日频数据，共 60,824 条观测值；其中 19 个指标具备多源对齐关系，可用于跨机构口径比较和一致性校验。
 
 ## 安装
 
@@ -213,4 +213,5 @@ powershell -ExecutionPolicy Bypass -File scripts/register_windows_task.ps1 -Time
 - 中国国家统计局数据采用本地官方文件导入，示例文件位于 `data_raw/china_official/nbs_2024_monthly_sample.csv`。
 - World Bank、FRED、OECD、Eurostat、ECB、BIS 在线采集依赖外部网络；无网络时可使用已有缓存和已生成的标准化数据。
 - 当前修订追踪为轻量版本，保留 `last_updated`、`retrieved_at`、`data_version` 和采集批次 manifest，尚未保存每次历史修订快照。
+
 

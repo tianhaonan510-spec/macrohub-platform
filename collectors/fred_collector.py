@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """Collect selected monthly U.S. macro indicators from FRED graph CSV endpoints."""
 
 from datetime import datetime
@@ -70,7 +70,7 @@ def collect_fred(force_refresh: bool = False) -> pd.DataFrame:
                     "indicator_name_zh": meta["indicator_name_zh"],
                     "indicator_name_en": meta["indicator_name_en"],
                     "date": row["observation_date"].strftime("%Y-%m"),
-                    "frequency": "M",
+                    "frequency": meta.get("frequency", "M"),
                     "unit": meta["unit"],
                     "seasonal_adjustment": meta["seasonal_adjustment"],
                     "calculation": meta["calculation"],
@@ -96,3 +96,4 @@ def collect_fred(force_refresh: bool = False) -> pd.DataFrame:
 
 if __name__ == "__main__":
     collect_fred()
+

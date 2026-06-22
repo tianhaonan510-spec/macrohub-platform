@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """Transform a local IMF WEO CSV file into MacroHub's standardized long table."""
 
 from datetime import datetime
@@ -11,7 +11,7 @@ RAW_FILE = DATA_RAW / "imf" / "imf_weo.csv"
 OUT_FILE = DATA_RAW / "imf" / "imf_standardized.csv"
 
 
-def clean_value(value):
+def clean_value(value, scale=None):
     if pd.isna(value):
         return None
 
@@ -20,7 +20,13 @@ def clean_value(value):
         return None
 
     try:
-        return float(text)
+        number = float(text)
+        scale_text = str(scale or "").lower()
+        if "billion" in scale_text:
+            number *= 1_000_000_000
+        elif "million" in scale_text:
+            number *= 1_000_000
+        return number
     except Exception:
         return None
 
@@ -93,7 +99,7 @@ def transform_imf_weo(df):
                     "unit": indicator_meta.get("unit", row.get("UNIT", "")),
                     "seasonal_adjustment": indicator_meta.get("seasonal_adjustment", "NSA"),
                     "calculation": indicator_meta.get("calculation", ""),
-                    "value": clean_value(row.get(year)),
+                    "value": clean_value(row.get(year), row.get("SCALE")),
                     "source_organization": "IMF",
                     "source_dataset": "World Economic Outlook",
                     "source_indicator_code": imf_indicator_code,
@@ -121,3 +127,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
