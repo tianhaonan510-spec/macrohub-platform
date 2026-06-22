@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 MacroHub 全球宏观经济指标数据要素服务平台
 dashboard/streamlit_app.py
@@ -50,10 +50,11 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 sys.path.append(str(BASE_DIR))
 
 try:
-    from config import DATA_CLEAN
+    from config import DATA_CLEAN, METADATA_DIR
     DB_PATH = DATA_CLEAN / "macrohub.db"
 except Exception:
     DATA_CLEAN = BASE_DIR / "data_clean"
+    METADATA_DIR = BASE_DIR / "metadata"
     DB_PATH = DATA_CLEAN / "macrohub.db"
 
 
@@ -185,6 +186,28 @@ def load_data() -> pd.DataFrame:
         df = pd.read_sql_query("SELECT * FROM macro_observations", conn)
     return df
 
+
+
+
+@st.cache_data
+def load_update_status() -> dict:
+    status_file = METADATA_DIR / "update_status.json"
+    if not status_file.exists():
+        return {
+            "status": "unknown",
+            "finished_at": "暂无定时更新记录",
+            "mode": "manual_or_initial_data",
+            "message": "当前数据来自本地标准库，尚未记录自动调度状态。",
+        }
+    try:
+        return json.loads(status_file.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return {
+            "status": "invalid",
+            "finished_at": "状态文件读取失败",
+            "mode": "unknown",
+            "message": str(exc),
+        }
 
 def safe_col(df: pd.DataFrame, col: str, default=None):
     if col in df.columns:
@@ -882,6 +905,24 @@ df_all["date"] = df_all["date"].astype(str)
 
 st.title("MacroHub 全球宏观经济指标数据要素服务平台")
 st.caption("多源采集 · 指标标准化 · 元数据治理 · JSON 结构化输出")
+
+
+
+update_status = load_update_status()
+status_label = {
+    "success": "定时更新成功",
+    "running": "定时更新中",
+    "failed": "定时更新失败",
+    "dry_run": "调度测试完成",
+    "unknown": "暂无调度记录",
+    "invalid": "调度状态异常",
+}.get(update_status.get("status"), str(update_status.get("status", "unknown")))
+st.caption(
+    f"数据更新状态：{status_label} · 最近完成时间：{update_status.get('finished_at') or update_status.get('started_at', '未知')} · "
+    f"更新模式：{update_status.get('mode', 'unknown')}"
+)
+if update_status.get("status") == "failed":
+    st.warning(f"最近一次定时更新失败：{update_status.get('message', '未知错误')}")
 
 k1, k2, k3, k4 = st.columns(4)
 k1.metric("数据源数量", df_all["source_organization"].nunique())
@@ -1622,5 +1663,9 @@ with tab14:
 通过数据资产评级中心，平台可以将标准化后的宏观经济指标进一步转化为可评估、可排序、可治理的数据资产。
 该模块体现了数据要素从“可用数据”向“可管理资产”的升级。
 """)
+
+
+
+
 
 

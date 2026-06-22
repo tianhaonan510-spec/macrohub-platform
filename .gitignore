@@ -1,4 +1,4 @@
-__pycache__/
+﻿__pycache__/
 *.py[cod]
 .pytest_cache/
 .mypy_cache/
@@ -7,3 +7,5 @@ __pycache__/
 logs/*.log
 cache/
 data_clean/_macro_observations_with_imf.csv
+metadata/update_status.json
+

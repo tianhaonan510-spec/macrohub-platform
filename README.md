@@ -1,4 +1,4 @@
-# MacroHub 全球宏观经济指标数据要素服务平台
+﻿# MacroHub 全球宏观经济指标数据要素服务平台
 
 MacroHub 面向“全球宏观经济指标数据要素采集与结构化服务”赛题，提供权威数据源接入、指标标准化治理、质量校验、SQLite 入库、CLI/FastAPI 查询和 Streamlit 可视化展示。
 
@@ -143,6 +143,42 @@ POST /batch_query
 streamlit run dashboard/streamlit_app.py
 ```
 
+
+## 定时更新与调度
+
+平台查询默认读取本地标准库 `data_clean/macrohub.db`，外部数据源通过采集任务定期刷新。推荐使用“固定时间自动采集 + 手动强制刷新”的模式，保证平台查询稳定、快速，同时保持数据可更新。
+
+手动执行一次调度更新：
+
+```bash
+python scripts/scheduled_update.py
+```
+
+强制重新请求外部接口并更新本地库：
+
+```bash
+python scripts/scheduled_update.py --force-refresh
+```
+
+只验证调度状态文件，不改动数据：
+
+```bash
+python scripts/scheduled_update.py --dry-run
+```
+
+注册 Windows 每日定时任务，默认每天 02:00 运行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/register_windows_task.ps1
+```
+
+指定每天 03:30 强制刷新：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/register_windows_task.ps1 -Time 03:30 -ForceRefresh
+```
+
+调度结果会写入 `metadata/update_status.json`，平台首页会显示最近更新时间、更新模式和调度状态。日志写入 `logs/scheduled_update.log`。
 ## JSON 输出说明
 
 当查询结果只有一个来源时，`series` 为对象；当同一指标同时命中 IMF、World Bank 等多个来源时，`series` 为数组，每个来源保留独立的 `source` 和 `observations`，避免多来源数据混淆。
@@ -172,3 +208,4 @@ streamlit run dashboard/streamlit_app.py
 - IMF WEO 当前来自本地公开 CSV，需要先放入 `data_raw/imf/imf_weo.csv`。
 - World Bank 和 FRED 在线采集依赖外部网络；无网络时可使用已有缓存和已生成的标准化数据。
 - 当前修订追踪为轻量版本，保留 `last_updated`、`retrieved_at`、`data_version` 和采集批次 manifest，尚未保存每次历史修订快照。
+
