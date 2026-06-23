@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 MacroHub 全球宏观经济指标数据要素服务平台
 dashboard/streamlit_app.py
@@ -208,6 +208,14 @@ def load_update_status() -> dict:
             "mode": "unknown",
             "message": str(exc),
         }
+
+
+@st.cache_data
+def load_alignment_candidates() -> pd.DataFrame:
+    candidate_file = METADATA_DIR / "alignment_candidates.csv"
+    if not candidate_file.exists():
+        return pd.DataFrame()
+    return pd.read_csv(candidate_file)
 
 def safe_col(df: pd.DataFrame, col: str, default=None):
     if col in df.columns:
@@ -937,7 +945,7 @@ indicators = sorted(df_all["indicator_code"].dropna().unique().tolist())
 frequencies = sorted(df_all["frequency"].dropna().unique().tolist())
 sources = ["全部"] + sorted(df_all["source_organization"].dropna().unique().tolist())
 
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12, tab13, tab14 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12, tab13, tab14, tab15 = st.tabs([
     "指标查询",
     "指标字典",
     "数据质量",
@@ -952,6 +960,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12, tab13
     "智能分析",
     "智能报告",
     "资产评级",
+    "指标对齐审核",
 ])
 
 
@@ -1669,3 +1678,97 @@ with tab14:
 
 
 
+
+
+# =========================
+# TAB15 指标对齐审核
+# =========================
+with tab15:
+    st.subheader("指标对齐审核中心")
+
+    st.info("""
+指标对齐审核中心用于展示平台的半自动指标对齐能力。系统基于标准指标字典，
+结合来源指标名称、原始代码、单位、频率和当前正式映射关系生成候选对齐结果，
+并给出匹配得分、置信等级和推荐理由，供人工复核后固化到来源映射表。
+""")
+
+    candidate_df = load_alignment_candidates()
+
+    if candidate_df.empty:
+        st.warning("当前尚未生成候选对齐表。请先运行：python scripts/generate_alignment_candidates.py")
+    else:
+        total_candidates = len(candidate_df)
+        confirmed_count = int((candidate_df["review_status"] == "已确认").sum())
+        review_count = int((candidate_df["review_status"] != "已确认").sum())
+        high_conf_count = int((candidate_df["confidence_level"] == "高可信").sum())
+
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("候选映射数量", total_candidates)
+        c2.metric("已确认映射", confirmed_count)
+        c3.metric("待人工复核", review_count)
+        c4.metric("高可信候选", high_conf_count)
+
+        st.markdown("### 审核筛选")
+        f1, f2, f3 = st.columns(3)
+        status_options = ["全部"] + sorted(candidate_df["review_status"].dropna().unique().tolist())
+        confidence_options = ["全部"] + sorted(candidate_df["confidence_level"].dropna().unique().tolist())
+        source_options = ["全部"] + sorted(candidate_df["source"].dropna().unique().tolist())
+
+        selected_status = f1.selectbox("审核状态", status_options, key="alignment_status")
+        selected_confidence = f2.selectbox("置信等级", confidence_options, key="alignment_confidence")
+        selected_source = f3.selectbox("数据来源", source_options, key="alignment_source")
+
+        display_df = candidate_df.copy()
+        if selected_status != "全部":
+            display_df = display_df[display_df["review_status"] == selected_status]
+        if selected_confidence != "全部":
+            display_df = display_df[display_df["confidence_level"] == selected_confidence]
+        if selected_source != "全部":
+            display_df = display_df[display_df["source"] == selected_source]
+
+        display_cols = [
+            "source", "source_dataset", "source_indicator_code", "source_indicator_name",
+            "current_indicator_code", "candidate_indicator_code",
+            "candidate_indicator_name_zh", "match_score", "confidence_level",
+            "match_reason", "review_status", "source_unit", "candidate_unit",
+            "source_frequency", "candidate_frequency", "country_count",
+            "observation_count", "start_date", "end_date",
+        ]
+        st.markdown("### 候选映射明细")
+        st.dataframe(display_df[display_cols], use_container_width=True)
+
+        st.markdown("### 置信等级分布")
+        conf_count = candidate_df["confidence_level"].value_counts().reset_index()
+        conf_count.columns = ["置信等级", "数量"]
+        fig_conf = px.bar(
+            conf_count,
+            x="置信等级",
+            y="数量",
+            title="候选指标对齐置信等级分布",
+            text="数量",
+        )
+        fig_conf.update_layout(
+            plot_bgcolor="#0f172a",
+            paper_bgcolor="#0f172a",
+            font_color="#e5e7eb",
+        )
+        st.plotly_chart(fig_conf, use_container_width=True)
+
+        st.markdown("### 对齐机制说明")
+        mechanism_df = pd.DataFrame([
+            {"环节": "标准字典约束", "说明": "以 indicator_master.csv 定义的平台标准指标为唯一目标集合。"},
+            {"环节": "智能候选推荐", "说明": "根据来源指标名称、原始代码、单位和频率计算候选匹配得分。"},
+            {"环节": "置信等级划分", "说明": "按匹配得分划分高可信、中可信、低可信和待复核。"},
+            {"环节": "人工审核固化", "说明": "审核通过的关系固化到 source_mapping.csv，作为正式对齐依据。"},
+        ])
+        st.dataframe(mechanism_df, use_container_width=True)
+
+        csv_data = candidate_df.to_csv(index=False, encoding="utf-8-sig")
+        st.download_button(
+            "下载候选对齐审核表 CSV",
+            data=csv_data,
+            file_name="alignment_candidates.csv",
+            mime="text/csv",
+        )
+
+        st.success("该模块将指标映射从单纯人工维护升级为“系统推荐 + 置信评分 + 人工复核”的人机协同治理流程。")

@@ -1,4 +1,4 @@
-﻿# MacroHub 全球宏观经济指标数据要素服务平台
+# MacroHub 全球宏观经济指标数据要素服务平台
 
 MacroHub 面向“全球宏观经济指标数据要素采集与结构化服务”赛题，提供权威数据源接入、指标标准化治理、质量校验、SQLite 入库、CLI/FastAPI 查询和 Streamlit 可视化展示。
 
@@ -141,6 +141,21 @@ POST /batch_query
 }
 ```
 
+## 半自动指标对齐审核
+
+平台采用“标准字典约束 + 智能候选推荐 + 置信评分 + 人工复核固化”的指标对齐机制。正式映射关系仍以 `metadata/source_mapping.csv` 为准，同时可通过脚本生成候选审核表：
+
+```bash
+python scripts/generate_alignment_candidates.py
+```
+
+脚本会读取 `metadata/indicator_master.csv`、`metadata/source_mapping.csv` 和 `data_clean/macro_observations.csv`，根据来源指标名称、原始代码、单位、频率及当前正式映射关系生成：
+
+```text
+metadata/alignment_candidates.csv
+```
+
+该文件包含候选标准指标、匹配得分、置信等级、推荐理由、审核状态、覆盖国家数和观测值规模。Streamlit 页面中的“指标对齐审核”模块可用于查看候选关系、筛选待复核项，并下载审核表。
 ## Streamlit 展示
 
 ```bash
