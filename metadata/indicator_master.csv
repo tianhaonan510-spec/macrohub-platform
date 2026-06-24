@@ -2,16 +2,16 @@
 GDP_NOMINAL_USD_A,名义GDP,Nominal GDP,current USD,A,NSA,level,2
 GDP_REAL_GROWTH_YOY_A,实际GDP增速,Real GDP Growth,%,A,NSA,YoY,2
 GDP_PER_CAPITA_USD_A,人均GDP,GDP per capita,current USD,A,NSA,level,2
-CPI_YOY_A,居民消费价格指数同比,Consumer Price Index YoY,%,A,NSA,YoY,2
-UNEMPLOYMENT_RATE_A,失业率,Unemployment Rate,% of labor force,A,NSA,level,2
+CPI_YOY_A,居民消费价格指数同比,Consumer Price Index YoY,%,A,NSA,YoY,4
+UNEMPLOYMENT_RATE_A,失业率,Unemployment Rate,% of labor force,A,NSA,level,3
 EXPORTS_USD_A,货物和服务出口,Exports of goods and services,current USD,A,NSA,level,2
 IMPORTS_USD_A,货物和服务进口,Imports of goods and services,current USD,A,NSA,level,2
 RESERVES_USD_A,外汇储备,Total reserves,current USD,A,NSA,level,1
 GOV_DEBT_GDP_A,政府债务占GDP比重,"Central government debt, total",% of GDP,A,NSA,level,2
 CURRENT_ACCOUNT_GDP_A,经常账户余额占GDP比重,Current account balance,% of GDP,A,NSA,level,2
-CPI_YOY_M,居民消费价格指数同比,Consumer Price Index YoY,%,M,NSA,YoY,2
+CPI_YOY_M,居民消费价格指数同比,Consumer Price Index YoY,%,M,NSA,YoY,4
 EUR_USD_EXCHANGE_RATE_D,欧元兑美元参考汇率,Euro foreign exchange reference rate: USD,USD per EUR,D,NSA,level,1
-EXCHANGE_RATE_USD_D,本币兑美元汇率,Exchange rates against USD,local currency per USD,D,NSA,level,1
+EXCHANGE_RATE_USD_D,本币兑美元汇率,Exchange rates against USD,local currency per USD,D,NSA,level,2
 GDP_CURRENT_LCU_A,本币计价名义GDP,Nominal GDP in local currency,current LCU,A,NSA,level,2
 GDP_REAL_LCU_A,本币计价实际GDP,Real GDP in local currency,constant LCU,A,NSA,level,2
 GDP_DEFLATOR_INDEX_A,GDP平减指数,GDP deflator index,index,A,NSA,level,2
@@ -54,3 +54,9 @@ US_2Y_TREASURY_RATE_M,美国2年期国债收益率,U.S. 2-Year Treasury Rate,%,M
 CN_CPI_YOY_M,中国居民消费价格指数同比,China CPI YoY,%,M,NSA,YoY,1
 CN_PPI_YOY_M,中国工业生产者出厂价格指数同比,China PPI YoY,%,M,NSA,YoY,1
 CN_INDUSTRIAL_VALUE_ADDED_YOY_M,中国规模以上工业增加值同比,China industrial value added YoY,%,M,NSA,YoY,1
+PPI_YOY_M,生产者价格指数同比,Producer Price Index YoY,%,M,NSA,YoY,2
+PPI_YOY_A,生产者价格指数同比,Producer Price Index YoY,%,A,NSA,annual_average,2
+INDUSTRIAL_OUTPUT_YOY_M,工业生产同比,Industrial Output YoY,%,M,NSA,YoY,2
+INDUSTRIAL_OUTPUT_YOY_A,工业生产同比,Industrial Output YoY,%,A,NSA,annual_average,2
+EXCHANGE_RATE_USD_M,本币兑美元汇率,Exchange rates against USD,local currency per USD,M,NSA,period_average,2
+EXCHANGE_RATE_USD_A,本币兑美元汇率,Exchange rates against USD,local currency per USD,A,NSA,period_average,2

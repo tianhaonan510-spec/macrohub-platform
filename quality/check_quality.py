@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import pandas as pd
 
 from config import DATA_CLEAN
@@ -96,7 +96,9 @@ def run_quality_checks() -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(f"Standardized data not found: {path}")
 
-    df = pd.read_csv(path, encoding="utf-8-sig")
+    df = pd.read_csv(path, encoding="utf-8-sig", low_memory=False)
+    df["date"] = df["date"].astype(str)
+    df["indicator_code"] = df["indicator_code"].astype(str)
     key_cols = ["country_code", "indicator_code", "date", "source_organization", "source_dataset"]
     checks = [
         {"check_item": "row_count", "value": len(df), "status": "info"},
@@ -136,3 +138,4 @@ def run_quality_checks() -> pd.DataFrame:
 
 if __name__ == "__main__":
     run_quality_checks()
+

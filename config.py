@@ -220,6 +220,7 @@ INDICATOR_MAP = {
         "sources": [
             {"organization": "World Bank", "dataset": "World Development Indicators", "source_series_code": "SL.UEM.TOTL.ZS"},
             {"organization": "IMF", "dataset": "World Economic Outlook", "source_series_code": "LUR"},
+            {"organization": "FRED", "dataset": "Federal Reserve Economic Data (annual average from UNRATE)", "source_series_code": "UNRATE.AAVG"},
         ],
     },
     "EXPORTS_USD_A": {
@@ -289,6 +290,8 @@ INDICATOR_MAP = {
         "sources": [
             {"organization": "OECD", "dataset": "Prices: Consumer prices", "source_series_code": "DF_PRICES_ALL.CPI.GY"},
             {"organization": "Eurostat", "dataset": "HICP monthly annual rate of change", "source_series_code": "prc_hicp_manr.CP00"},
+            {"organization": "FRED", "dataset": "Federal Reserve Economic Data (derived from CPIAUCSL)", "source_series_code": "CPIAUCSL.YOY"},
+            {"organization": "National Bureau of Statistics of China", "dataset": "National Bureau of Statistics monthly data (aligned)", "source_series_code": "NBS.CPI.YOY.M.ALIGNED"},
         ],
     },
     "EUR_USD_EXCHANGE_RATE_D": {
@@ -311,6 +314,7 @@ INDICATOR_MAP = {
         "calculation": "level",
         "sources": [
             {"organization": "BIS", "dataset": "Exchange rates", "source_series_code": "WS_XRU.D"},
+            {"organization": "ECB", "dataset": "Euro foreign exchange reference rates (inverted)", "source_series_code": "EXR.D.USD.EUR.SP00.A.INV"},
         ],
     },
 }
@@ -535,3 +539,96 @@ for indicator_code, meta in CHINA_OFFICIAL_SERIES.items():
 
 
 
+
+
+# Cross-source aligned indicators generated from already collected official/API series.
+def _append_indicator_source(indicator_code: str, source: dict):
+    if indicator_code not in INDICATOR_MAP:
+        return
+    existing = {
+        (item.get("organization"), item.get("dataset"), item.get("source_series_code"))
+        for item in INDICATOR_MAP[indicator_code].get("sources", [])
+    }
+    key = (source.get("organization"), source.get("dataset"), source.get("source_series_code"))
+    if key not in existing:
+        INDICATOR_MAP[indicator_code].setdefault("sources", []).append(source)
+
+
+_append_indicator_source("CPI_YOY_A", {"organization": "FRED", "dataset": "Federal Reserve Economic Data (annualized from CPIAUCSL.YOY)", "source_series_code": "CPIAUCSL.YOY.AAVG"})
+_append_indicator_source("CPI_YOY_A", {"organization": "National Bureau of Statistics of China", "dataset": "National Bureau of Statistics monthly data (annualized)", "source_series_code": "NBS.CPI.YOY.M.ALIGNED.AAVG"})
+
+DIRECT_ALIGNED_INDICATORS = {
+    "PPI_YOY_M": {
+        "indicator_name_zh": "生产者价格指数同比",
+        "indicator_name_en": "Producer Price Index YoY",
+        "unit": "%",
+        "frequency": "M",
+        "seasonal_adjustment": "NSA",
+        "calculation": "YoY",
+        "sources": [
+            {"organization": "FRED", "dataset": "Federal Reserve Economic Data (derived from PPIACO)", "source_series_code": "PPIACO.YOY"},
+            {"organization": "National Bureau of Statistics of China", "dataset": "National Bureau of Statistics monthly data (aligned)", "source_series_code": "NBS.PPI.YOY.M.ALIGNED"},
+        ],
+    },
+    "PPI_YOY_A": {
+        "indicator_name_zh": "生产者价格指数同比",
+        "indicator_name_en": "Producer Price Index YoY",
+        "unit": "%",
+        "frequency": "A",
+        "seasonal_adjustment": "NSA",
+        "calculation": "annual_average",
+        "sources": [
+            {"organization": "FRED", "dataset": "Federal Reserve Economic Data (annualized from PPIACO.YOY)", "source_series_code": "PPIACO.YOY.AAVG"},
+            {"organization": "National Bureau of Statistics of China", "dataset": "National Bureau of Statistics monthly data (annualized)", "source_series_code": "NBS.PPI.YOY.M.ALIGNED.AAVG"},
+        ],
+    },
+    "INDUSTRIAL_OUTPUT_YOY_M": {
+        "indicator_name_zh": "工业生产同比",
+        "indicator_name_en": "Industrial Output YoY",
+        "unit": "%",
+        "frequency": "M",
+        "seasonal_adjustment": "NSA",
+        "calculation": "YoY",
+        "sources": [
+            {"organization": "FRED", "dataset": "Federal Reserve Economic Data (derived from INDPRO)", "source_series_code": "INDPRO.YOY"},
+            {"organization": "National Bureau of Statistics of China", "dataset": "National Bureau of Statistics monthly data (aligned)", "source_series_code": "NBS.INDUSTRIAL.VALUE.ADDED.YOY.M.ALIGNED"},
+        ],
+    },
+    "INDUSTRIAL_OUTPUT_YOY_A": {
+        "indicator_name_zh": "工业生产同比",
+        "indicator_name_en": "Industrial Output YoY",
+        "unit": "%",
+        "frequency": "A",
+        "seasonal_adjustment": "NSA",
+        "calculation": "annual_average",
+        "sources": [
+            {"organization": "FRED", "dataset": "Federal Reserve Economic Data (annualized from INDPRO.YOY)", "source_series_code": "INDPRO.YOY.AAVG"},
+            {"organization": "National Bureau of Statistics of China", "dataset": "National Bureau of Statistics monthly data (annualized)", "source_series_code": "NBS.INDUSTRIAL.VALUE.ADDED.YOY.M.ALIGNED.AAVG"},
+        ],
+    },
+    "EXCHANGE_RATE_USD_M": {
+        "indicator_name_zh": "本币兑美元汇率",
+        "indicator_name_en": "Exchange rates against USD",
+        "unit": "local currency per USD",
+        "frequency": "M",
+        "seasonal_adjustment": "NSA",
+        "calculation": "period_average",
+        "sources": [
+            {"organization": "BIS", "dataset": "Exchange rates (monthly average)", "source_series_code": "WS_XRU.D.MAVG"},
+            {"organization": "ECB", "dataset": "Euro foreign exchange reference rates (monthly average, inverted)", "source_series_code": "EXR.D.USD.EUR.SP00.A.INV.MAVG"},
+        ],
+    },
+    "EXCHANGE_RATE_USD_A": {
+        "indicator_name_zh": "本币兑美元汇率",
+        "indicator_name_en": "Exchange rates against USD",
+        "unit": "local currency per USD",
+        "frequency": "A",
+        "seasonal_adjustment": "NSA",
+        "calculation": "period_average",
+        "sources": [
+            {"organization": "BIS", "dataset": "Exchange rates (annual average)", "source_series_code": "WS_XRU.D.AAVG"},
+            {"organization": "ECB", "dataset": "Euro foreign exchange reference rates (annual average, inverted)", "source_series_code": "EXR.D.USD.EUR.SP00.A.INV.AAVG"},
+        ],
+    },
+}
+INDICATOR_MAP.update(DIRECT_ALIGNED_INDICATORS)

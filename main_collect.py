@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import argparse
 import json
 from datetime import datetime
@@ -14,17 +14,18 @@ from collectors.oecd_collector import collect_oecd
 from collectors.worldbank_collector import collect_worldbank
 from config import DATA_CLEAN, DATA_RAW, METADATA_DIR
 from quality.check_quality import run_quality_checks
+from scripts.build_aligned_derived_sources import build_aligned_derived_sources
 from standardizer.standardize import standardize_worldbank
 from storage.database import init_db
 
 
 def _align_to_main_schema(main_file, extra_file):
-    df_main = pd.read_csv(main_file, encoding="utf-8-sig")
+    df_main = pd.read_csv(main_file, encoding="utf-8-sig", low_memory=False)
     if not extra_file.exists():
         print(f"[Merge] skip missing file: {extra_file}")
         return df_main
 
-    df_extra = pd.read_csv(extra_file, encoding="utf-8-sig")
+    df_extra = pd.read_csv(extra_file, encoding="utf-8-sig", low_memory=False)
     for col in df_main.columns:
         if col not in df_extra.columns:
             df_extra[col] = None
@@ -47,11 +48,16 @@ def merge_standardized_sources():
         DATA_RAW / "ecb_raw.csv",
         DATA_RAW / "bis_raw.csv",
         DATA_RAW / "china_official_raw.csv",
+        DATA_RAW / "aligned_derived_raw.csv",
     ]
     for extra_file in extra_files:
         df_all = _align_to_main_schema(temp_file, extra_file)
         df_all.to_csv(temp_file, index=False, encoding="utf-8-sig")
     temp_file.unlink(missing_ok=True)
+
+    df_all["indicator_code"] = df_all["indicator_code"].astype("string")
+    df_all = df_all[df_all["indicator_code"].notna() & (df_all["indicator_code"].str.strip() != "")].copy()
+    df_all["date"] = df_all["date"].astype(str)
 
     key_cols = ["country_code", "indicator_code", "date", "source_organization", "source_dataset"]
     df_all = df_all.drop_duplicates(subset=key_cols, keep="last")
@@ -73,6 +79,7 @@ def write_run_manifest():
             "ecb_raw": str(DATA_RAW / "ecb_raw.csv"),
             "bis_raw": str(DATA_RAW / "bis_raw.csv"),
             "china_official_raw": str(DATA_RAW / "china_official_raw.csv"),
+            "aligned_derived_raw": str(DATA_RAW / "aligned_derived_raw.csv"),
             "macro_observations": str(DATA_CLEAN / "macro_observations.csv"),
             "macrohub_db": str(DATA_CLEAN / "macrohub.db"),
         },
@@ -84,6 +91,7 @@ def write_run_manifest():
             "ECB requests use local CSV cache unless --force-refresh is set.",
             "BIS requests use local CSV cache unless --force-refresh is set.",
             "China official data is imported from local CSV files in data_raw/china_official.",
+            "Aligned derived observations transform selected official source series into common standard indicators for cross-source comparison.",
             "IMF WEO is transformed from the local data_raw/imf/imf_weo.csv file.",
         ],
     }
@@ -120,22 +128,26 @@ def run_full_pipeline(force_refresh: bool = False, skip_fred: bool = False, skip
     else:
         print("Step 4-8/10: skip OECD/Eurostat/ECB/BIS/China-official collection")
 
-    print("Step 9/12: merge all standardized sources")
+    print("Step 9/13: build aligned derived cross-source observations")
+    build_aligned_derived_sources()
+
+    print("Step 10/13: merge all standardized sources")
     merge_standardized_sources()
 
-    print("Step 10/12: run quality checks")
+    print("Step 11/13: run quality checks")
     run_quality_checks()
 
-    print("Step 11/12: initialize SQLite database")
+    print("Step 12/13: initialize SQLite database")
     init_db()
 
-    print("Step 12/12: write run manifest")
+    print("Step 13/13: write run manifest")
     write_run_manifest()
 
     print("Pipeline complete.")
 
 
 def run_merge_only():
+    build_aligned_derived_sources()
     merge_standardized_sources()
     run_quality_checks()
     init_db()
@@ -191,3 +203,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
+
+

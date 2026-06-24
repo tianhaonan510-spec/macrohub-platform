@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import sqlite3
 
 import pandas as pd
@@ -11,7 +11,7 @@ def init_db() -> None:
     if not csv_path.exists():
         raise FileNotFoundError(f"Standardized data not found: {csv_path}")
 
-    df = pd.read_csv(csv_path, encoding="utf-8-sig")
+    df = pd.read_csv(csv_path, encoding="utf-8-sig", low_memory=False)
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     with sqlite3.connect(DB_PATH) as conn:
         df.to_sql("macro_observations", conn, if_exists="replace", index=False)
@@ -52,3 +52,4 @@ def query_observations(country: str, indicator: str, start: str = None, end: str
 
 if __name__ == "__main__":
     init_db()
+

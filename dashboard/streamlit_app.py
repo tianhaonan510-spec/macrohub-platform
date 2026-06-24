@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 MacroHub 全球宏观经济指标数据要素服务平台
 dashboard/streamlit_app.py
@@ -945,6 +945,61 @@ indicators = sorted(df_all["indicator_code"].dropna().unique().tolist())
 frequencies = sorted(df_all["frequency"].dropna().unique().tolist())
 sources = ["全部"] + sorted(df_all["source_organization"].dropna().unique().tolist())
 
+country_meta = (
+    df_all[["country_code", "country_name_zh", "country_name_en"]]
+    .dropna(subset=["country_code"])
+    .drop_duplicates("country_code")
+    .set_index("country_code")
+    .to_dict("index")
+)
+indicator_meta = (
+    df_all[["indicator_code", "indicator_name_zh", "indicator_name_en", "unit"]]
+    .dropna(subset=["indicator_code"])
+    .drop_duplicates("indicator_code")
+    .set_index("indicator_code")
+    .to_dict("index")
+)
+frequency_meta = {"A": "年度 Annual", "Q": "季度 Quarterly", "M": "月度 Monthly", "D": "日度 Daily"}
+source_meta = {
+    "全部": "全部 All sources",
+    "World Bank": "World Bank｜世界银行",
+    "IMF": "IMF｜国际货币基金组织",
+    "FRED": "FRED｜美国圣路易斯联储",
+    "OECD": "OECD｜经合组织",
+    "Eurostat": "Eurostat｜欧盟统计局",
+    "ECB": "ECB｜欧洲中央银行",
+    "BIS": "BIS｜国际清算银行",
+    "National Bureau of Statistics of China": "中国国家统计局｜National Bureau of Statistics of China",
+}
+
+
+def country_label(code: str) -> str:
+    meta = country_meta.get(code, {})
+    zh = meta.get("country_name_zh") or code
+    en = meta.get("country_name_en") or code
+    return f"{code}｜{zh}｜{en}"
+
+
+def indicator_label(code: str) -> str:
+    meta = indicator_meta.get(code, {})
+    zh = meta.get("indicator_name_zh") or code
+    en = meta.get("indicator_name_en") or code
+    unit = meta.get("unit")
+    suffix = f"｜{unit}" if pd.notna(unit) and str(unit).strip() else ""
+    return f"{code}｜{zh}｜{en}{suffix}"
+
+
+def frequency_label(code: str) -> str:
+    return f"{code}｜{frequency_meta.get(code, code)}"
+
+
+def source_label(source: str) -> str:
+    return source_meta.get(source, source)
+
+
+def csv_download_bytes(df: pd.DataFrame) -> bytes:
+    return df.to_csv(index=False).encode("utf-8-sig")
+
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12, tab13, tab14, tab15 = st.tabs([
     "指标查询",
     "指标字典",
@@ -971,10 +1026,10 @@ with tab1:
     st.subheader("指标查询与趋势分析")
 
     c1, c2, c3, c4 = st.columns(4)
-    country = c1.selectbox("国家/地区", countries)
-    indicator = c2.selectbox("标准指标", indicators)
-    frequency = c3.selectbox("频率", frequencies)
-    source_selected = c4.selectbox("数据来源", sources)
+    country = c1.selectbox("国家/地区", countries, format_func=country_label)
+    indicator = c2.selectbox("标准指标", indicators, format_func=indicator_label)
+    frequency = c3.selectbox("频率", frequencies, format_func=frequency_label)
+    source_selected = c4.selectbox("数据来源", sources, format_func=source_label)
 
     date_num = pd.to_numeric(df_all["date"], errors="coerce").dropna()
     min_year = int(date_num.min()) if not date_num.empty else 1980
@@ -1029,7 +1084,7 @@ with tab1:
         st.markdown("### 标准化观测数据")
         st.dataframe(df_query.drop(columns=["date_int"], errors="ignore"), use_container_width=True)
 
-        csv_data = df_query.drop(columns=["date_int"], errors="ignore").to_csv(index=False, encoding="utf-8-sig")
+        csv_data = csv_download_bytes(df_query.drop(columns=["date_int"], errors="ignore"))
         st.download_button(
             "下载查询结果 CSV",
             data=csv_data,
@@ -1083,10 +1138,10 @@ with tab3:
 with tab4:
     st.subheader("标准化 JSON 输出")
     c1, c2, c3, c4 = st.columns(4)
-    json_country = c1.selectbox("国家", countries, key="json_country")
-    json_indicator = c2.selectbox("指标", indicators, key="json_indicator")
-    json_frequency = c3.selectbox("频率", frequencies, key="json_frequency")
-    json_source = c4.selectbox("数据来源", sources, key="json_source")
+    json_country = c1.selectbox("国家", countries, key="json_country", format_func=country_label)
+    json_indicator = c2.selectbox("指标", indicators, key="json_indicator", format_func=indicator_label)
+    json_frequency = c3.selectbox("频率", frequencies, key="json_frequency", format_func=frequency_label)
+    json_source = c4.selectbox("数据来源", sources, key="json_source", format_func=source_label)
 
     df_json = query_data(df_all, json_country, json_indicator, json_frequency, json_source)
     json_output = build_json_output(df_json, json_country, json_indicator, json_frequency, json_source)
@@ -1116,8 +1171,8 @@ with tab5:
         st.warning("当前没有可进行多源一致性分析的指标。")
     else:
         c1, c2 = st.columns(2)
-        compare_country = c1.selectbox("国家", countries, key="compare_country")
-        compare_indicator = c2.selectbox("标准指标", multi_source_indicators, key="compare_indicator")
+        compare_country = c1.selectbox("国家", countries, key="compare_country", format_func=country_label)
+        compare_indicator = c2.selectbox("标准指标", multi_source_indicators, key="compare_indicator", format_func=indicator_label)
 
         df_compare = df_all[
             (df_all["country_code"] == compare_country)
@@ -1216,7 +1271,7 @@ with tab7:
     lineage_df = df_all[existing_lineage_cols].drop_duplicates().copy()
     lineage_indicators = sorted(lineage_df["indicator_code"].dropna().unique().tolist())
 
-    selected_lineage_indicator = st.selectbox("选择标准指标", lineage_indicators, key="lineage_indicator")
+    selected_lineage_indicator = st.selectbox("选择标准指标", lineage_indicators, key="lineage_indicator", format_func=indicator_label)
     selected_lineage_df = lineage_df[lineage_df["indicator_code"] == selected_lineage_indicator].copy()
 
     if selected_lineage_df.empty:
@@ -1403,10 +1458,10 @@ with tab12:
     st.subheader("AI 智能分析")
 
     c1, c2, c3, c4 = st.columns(4)
-    ai_country = c1.selectbox("国家/地区", countries, key="ai_country")
-    ai_indicator = c2.selectbox("标准指标", indicators, key="ai_indicator")
-    ai_frequency = c3.selectbox("频率", frequencies, key="ai_frequency")
-    ai_source = c4.selectbox("数据来源", sources, key="ai_source")
+    ai_country = c1.selectbox("国家/地区", countries, key="ai_country", format_func=country_label)
+    ai_indicator = c2.selectbox("标准指标", indicators, key="ai_indicator", format_func=indicator_label)
+    ai_frequency = c3.selectbox("频率", frequencies, key="ai_frequency", format_func=frequency_label)
+    ai_source = c4.selectbox("数据来源", sources, key="ai_source", format_func=source_label)
 
     ai_df = query_data(df_all, ai_country, ai_indicator, ai_frequency, ai_source)
     valid_ai_df = ai_df.dropna(subset=["value"]).copy()
@@ -1443,10 +1498,10 @@ with tab13:
     st.info("智能报告中心用于将指标查询、趋势分析、风险判断、数据来源和治理信息自动整合为可下载的宏观分析报告。")
 
     c1, c2, c3, c4 = st.columns(4)
-    report_country = c1.selectbox("国家/地区", countries, key="report_country")
-    report_indicator = c2.selectbox("标准指标", indicators, key="report_indicator")
-    report_frequency = c3.selectbox("频率", frequencies, key="report_frequency")
-    report_source = c4.selectbox("数据来源", sources, key="report_source")
+    report_country = c1.selectbox("国家/地区", countries, key="report_country", format_func=country_label)
+    report_indicator = c2.selectbox("标准指标", indicators, key="report_indicator", format_func=indicator_label)
+    report_frequency = c3.selectbox("频率", frequencies, key="report_frequency", format_func=frequency_label)
+    report_source = c4.selectbox("数据来源", sources, key="report_source", format_func=source_label)
 
     report_df = query_data(df_all, report_country, report_indicator, report_frequency, report_source)
     report_valid = report_df.dropna(subset=["value"]).copy()
@@ -1577,7 +1632,7 @@ with tab13:
             mime="application/json",
         )
 
-        report_csv = report_valid.drop(columns=["date_int"], errors="ignore").to_csv(index=False, encoding="utf-8-sig")
+        report_csv = csv_download_bytes(report_valid.drop(columns=["date_int"], errors="ignore"))
         st.download_button(
             "下载报告数据 CSV",
             data=report_csv,
@@ -1763,7 +1818,7 @@ with tab15:
         ])
         st.dataframe(mechanism_df, use_container_width=True)
 
-        csv_data = candidate_df.to_csv(index=False, encoding="utf-8-sig")
+        csv_data = csv_download_bytes(candidate_df)
         st.download_button(
             "下载候选对齐审核表 CSV",
             data=csv_data,
@@ -1772,3 +1827,5 @@ with tab15:
         )
 
         st.success("该模块将指标映射从单纯人工维护升级为“系统推荐 + 置信评分 + 人工复核”的人机协同治理流程。")
+
+

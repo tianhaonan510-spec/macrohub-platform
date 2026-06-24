@@ -7,8 +7,11 @@ World Bank,World Development Indicators,NY.GDP.PCAP.CD,GDP_PER_CAPITA_USD_A
 IMF,World Economic Outlook,NGDPDPC,GDP_PER_CAPITA_USD_A
 World Bank,World Development Indicators,FP.CPI.TOTL.ZG,CPI_YOY_A
 IMF,World Economic Outlook,PCPIPCH,CPI_YOY_A
+FRED,Federal Reserve Economic Data (annualized from CPIAUCSL.YOY),CPIAUCSL.YOY.AAVG,CPI_YOY_A
+National Bureau of Statistics of China,National Bureau of Statistics monthly data (annualized),NBS.CPI.YOY.M.ALIGNED.AAVG,CPI_YOY_A
 World Bank,World Development Indicators,SL.UEM.TOTL.ZS,UNEMPLOYMENT_RATE_A
 IMF,World Economic Outlook,LUR,UNEMPLOYMENT_RATE_A
+FRED,Federal Reserve Economic Data (annual average from UNRATE),UNRATE.AAVG,UNEMPLOYMENT_RATE_A
 World Bank,World Development Indicators,NE.EXP.GNFS.CD,EXPORTS_USD_A
 IMF,World Economic Outlook,BX,EXPORTS_USD_A
 World Bank,World Development Indicators,NE.IMP.GNFS.CD,IMPORTS_USD_A
@@ -20,8 +23,11 @@ World Bank,World Development Indicators,BN.CAB.XOKA.GD.ZS,CURRENT_ACCOUNT_GDP_A
 IMF,World Economic Outlook,BCA_NGDPD,CURRENT_ACCOUNT_GDP_A
 OECD,Prices: Consumer prices,DF_PRICES_ALL.CPI.GY,CPI_YOY_M
 Eurostat,HICP monthly annual rate of change,prc_hicp_manr.CP00,CPI_YOY_M
+FRED,Federal Reserve Economic Data (derived from CPIAUCSL),CPIAUCSL.YOY,CPI_YOY_M
+National Bureau of Statistics of China,National Bureau of Statistics monthly data (aligned),NBS.CPI.YOY.M.ALIGNED,CPI_YOY_M
 ECB,Euro foreign exchange reference rates,EXR.D.USD.EUR.SP00.A,EUR_USD_EXCHANGE_RATE_D
 BIS,Exchange rates,WS_XRU.D,EXCHANGE_RATE_USD_D
+ECB,Euro foreign exchange reference rates (inverted),EXR.D.USD.EUR.SP00.A.INV,EXCHANGE_RATE_USD_D
 World Bank,World Development Indicators,NY.GDP.MKTP.CN,GDP_CURRENT_LCU_A
 IMF,World Economic Outlook,NGDP,GDP_CURRENT_LCU_A
 World Bank,World Development Indicators,NY.GDP.MKTP.KN,GDP_REAL_LCU_A
@@ -73,3 +79,15 @@ FRED,Federal Reserve Economic Data,GS2,US_2Y_TREASURY_RATE_M
 National Bureau of Statistics of China,National Bureau of Statistics monthly data,NBS.CPI.YOY.M,CN_CPI_YOY_M
 National Bureau of Statistics of China,National Bureau of Statistics monthly data,NBS.PPI.YOY.M,CN_PPI_YOY_M
 National Bureau of Statistics of China,National Bureau of Statistics monthly data,NBS.IVA.YOY.M,CN_INDUSTRIAL_VALUE_ADDED_YOY_M
+FRED,Federal Reserve Economic Data (derived from PPIACO),PPIACO.YOY,PPI_YOY_M
+National Bureau of Statistics of China,National Bureau of Statistics monthly data (aligned),NBS.PPI.YOY.M.ALIGNED,PPI_YOY_M
+FRED,Federal Reserve Economic Data (annualized from PPIACO.YOY),PPIACO.YOY.AAVG,PPI_YOY_A
+National Bureau of Statistics of China,National Bureau of Statistics monthly data (annualized),NBS.PPI.YOY.M.ALIGNED.AAVG,PPI_YOY_A
+FRED,Federal Reserve Economic Data (derived from INDPRO),INDPRO.YOY,INDUSTRIAL_OUTPUT_YOY_M
+National Bureau of Statistics of China,National Bureau of Statistics monthly data (aligned),NBS.INDUSTRIAL.VALUE.ADDED.YOY.M.ALIGNED,INDUSTRIAL_OUTPUT_YOY_M
+FRED,Federal Reserve Economic Data (annualized from INDPRO.YOY),INDPRO.YOY.AAVG,INDUSTRIAL_OUTPUT_YOY_A
+National Bureau of Statistics of China,National Bureau of Statistics monthly data (annualized),NBS.INDUSTRIAL.VALUE.ADDED.YOY.M.ALIGNED.AAVG,INDUSTRIAL_OUTPUT_YOY_A
+BIS,Exchange rates (monthly average),WS_XRU.D.MAVG,EXCHANGE_RATE_USD_M
+ECB,"Euro foreign exchange reference rates (monthly average, inverted)",EXR.D.USD.EUR.SP00.A.INV.MAVG,EXCHANGE_RATE_USD_M
+BIS,Exchange rates (annual average),WS_XRU.D.AAVG,EXCHANGE_RATE_USD_A
+ECB,"Euro foreign exchange reference rates (annual average, inverted)",EXR.D.USD.EUR.SP00.A.INV.AAVG,EXCHANGE_RATE_USD_A
