@@ -232,6 +232,16 @@ def format_number(x):
         return str(x)
 
 
+def add_date_fields(df: pd.DataFrame) -> pd.DataFrame:
+    out = df.copy()
+    date_text = out["date"].astype(str)
+    out["date_year"] = pd.to_numeric(date_text.str.extract(r"^(\d{4})", expand=False), errors="coerce")
+    out["date_sort"] = pd.to_datetime(date_text, errors="coerce")
+    annual_mask = out["date_sort"].isna() & out["date_year"].notna()
+    out.loc[annual_mask, "date_sort"] = pd.to_datetime(out.loc[annual_mask, "date_year"].astype(int).astype(str) + "-01-01")
+    return out
+
+
 def query_data(
     df_all: pd.DataFrame,
     country: str,
@@ -250,14 +260,14 @@ def query_data(
     if source != "全部":
         df = df[df["source_organization"] == source].copy()
 
-    df["date_int"] = pd.to_numeric(df["date"], errors="coerce")
+    df = add_date_fields(df)
 
     if start_year is not None:
-        df = df[df["date_int"] >= int(start_year)]
+        df = df[df["date_year"] >= int(start_year)]
     if end_year is not None:
-        df = df[df["date_int"] <= int(end_year)]
+        df = df[df["date_year"] <= int(end_year)]
 
-    return df.sort_values(["source_organization", "date_int", "date"])
+    return df.sort_values(["source_organization", "date_sort", "date"])
 
 
 def get_valid_stats(df_query: pd.DataFrame):
@@ -265,8 +275,8 @@ def get_valid_stats(df_query: pd.DataFrame):
     if valid_df.empty:
         return None
 
-    valid_df["date_int"] = pd.to_numeric(valid_df["date"], errors="coerce")
-    valid_df = valid_df.sort_values("date_int")
+    valid_df = add_date_fields(valid_df)
+    valid_df = valid_df.sort_values("date_sort")
 
     latest_row = valid_df.iloc[-1]
     latest_value = latest_row["value"]
@@ -286,8 +296,8 @@ def get_valid_stats(df_query: pd.DataFrame):
         "min_value": valid_df["value"].min(),
         "mean_value": valid_df["value"].mean(),
         "valid_count": len(valid_df),
-        "start_year": int(valid_df["date_int"].min()),
-        "end_year": int(valid_df["date_int"].max()),
+        "start_year": int(valid_df["date_year"].min()),
+        "end_year": int(valid_df["date_year"].max()),
     }
 
 
@@ -408,7 +418,7 @@ def infer_trend(valid_df: pd.DataFrame) -> str:
     if len(valid_df) < 3:
         return "样本较少，趋势不明显"
 
-    valid_df = valid_df.sort_values("date_int")
+    valid_df = add_date_fields(valid_df).sort_values("date_sort")
     recent = valid_df.tail(min(5, len(valid_df)))
     start = recent.iloc[0]["value"]
     end = recent.iloc[-1]["value"]
@@ -467,8 +477,8 @@ def infer_risk(indicator: str, latest_value: float, mean_value: float) -> str:
 
 def generate_ai_text(df_query: pd.DataFrame, country: str, indicator: str):
     valid_df = df_query.dropna(subset=["value"]).copy()
-    valid_df["date_int"] = pd.to_numeric(valid_df["date"], errors="coerce")
-    valid_df = valid_df.dropna(subset=["date_int"]).sort_values("date_int")
+    valid_df = add_date_fields(valid_df)
+    valid_df = valid_df.dropna(subset=["date_sort"]).sort_values("date_sort")
 
     if valid_df.empty:
         return {
@@ -759,7 +769,8 @@ def build_asset_rating(df_all: pd.DataFrame) -> pd.DataFrame:
     """Build data asset rating table."""
     base = df_all.copy()
     base["value"] = pd.to_numeric(base["value"], errors="coerce")
-    base["date_num"] = pd.to_numeric(base["date"], errors="coerce")
+    base = add_date_fields(base)
+    base["date_num"] = base["date_year"]
 
     completeness = (
         base.groupby("indicator_code")["value"]
@@ -1066,7 +1077,7 @@ with tab1:
     source_selected = c4.selectbox("数据来源", sources, format_func=source_label)
     selection_caption(country, indicator, frequency, source_selected)
 
-    date_num = pd.to_numeric(df_all["date"], errors="coerce").dropna()
+    date_num = add_date_fields(df_all)["date_year"].dropna()
     min_year = int(date_num.min()) if not date_num.empty else 1980
     max_year = int(date_num.max()) if not date_num.empty else 2031
 
@@ -1117,9 +1128,9 @@ with tab1:
         st.dataframe(df_query[meta_cols].drop_duplicates(), use_container_width=True)
 
         st.markdown("### 标准化观测数据")
-        st.dataframe(df_query.drop(columns=["date_int"], errors="ignore"), use_container_width=True)
+        st.dataframe(df_query.drop(columns=["date_int", "date_year", "date_sort"], errors="ignore"), use_container_width=True)
 
-        csv_data = csv_download_bytes(df_query.drop(columns=["date_int"], errors="ignore"))
+        csv_data = csv_download_bytes(df_query.drop(columns=["date_int", "date_year", "date_sort"], errors="ignore"))
         st.download_button(
             "下载查询结果 CSV",
             data=csv_data,
@@ -1507,8 +1518,8 @@ with tab12:
     if valid_ai_df.empty:
         st.warning("当前查询条件下没有可用于智能分析的有效数据。")
     else:
-        valid_ai_df["date_int"] = pd.to_numeric(valid_ai_df["date"], errors="coerce")
-        valid_ai_df = valid_ai_df.dropna(subset=["date_int"]).sort_values("date_int")
+        valid_ai_df = add_date_fields(valid_ai_df)
+        valid_ai_df = valid_ai_df.dropna(subset=["date_sort"]).sort_values("date_sort")
 
         fig_ai = px.line(valid_ai_df, x="date", y="value", color="source_organization", markers=True, title=f"{ai_country} - {ai_indicator} 智能趋势分析")
         fig_ai.update_layout(plot_bgcolor="#0f172a", paper_bgcolor="#0f172a", font_color="#e5e7eb")
@@ -1548,8 +1559,8 @@ with tab13:
     if report_valid.empty:
         st.warning("当前查询条件下暂无有效数据，无法生成报告。")
     else:
-        report_valid["date_int"] = pd.to_numeric(report_valid["date"], errors="coerce")
-        report_valid = report_valid.dropna(subset=["date_int"]).sort_values("date_int")
+        report_valid = add_date_fields(report_valid)
+        report_valid = report_valid.dropna(subset=["date_sort"]).sort_values("date_sort")
 
         report_stats = get_valid_stats(report_valid)
         ai_result = generate_ai_text(report_valid, report_country, report_indicator)
@@ -1671,7 +1682,7 @@ with tab13:
             mime="application/json",
         )
 
-        report_csv = csv_download_bytes(report_valid.drop(columns=["date_int"], errors="ignore"))
+        report_csv = csv_download_bytes(report_valid.drop(columns=["date_int", "date_year", "date_sort"], errors="ignore"))
         st.download_button(
             "下载报告数据 CSV",
             data=report_csv,
@@ -1866,6 +1877,8 @@ with tab15:
         )
 
         st.success("该模块将指标映射从单纯人工维护升级为“系统推荐 + 置信评分 + 人工复核”的人机协同治理流程。")
+
+
 
 
 
