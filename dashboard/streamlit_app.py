@@ -1,6 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 """
-MacroHub 全球宏观经济指标数据要素服务平台
+EconAtlas 全球宏观经济指标数据要素服务平台
 dashboard/streamlit_app.py
 
 功能模块：
@@ -62,7 +62,7 @@ except Exception:
 # 页面配置
 # =========================
 st.set_page_config(
-    page_title="MacroHub 全球宏观经济指标数据要素服务平台",
+    page_title="EconAtlas 全球宏观经济指标数据要素服务平台",
     layout="wide"
 )
 
@@ -136,6 +136,33 @@ div[role="option"] {
 }
 div[role="option"]:hover {
     background-color: #1e293b !important;
+}
+[data-baseweb="popover"],
+[data-baseweb="popover"] > div,
+[data-baseweb="menu"],
+ul[role="listbox"],
+ul[role="listbox"] li,
+div[role="listbox"],
+div[role="listbox"] * {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+}
+ul[role="listbox"],
+div[role="listbox"] {
+    border: 1px solid #38bdf8 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 18px 36px rgba(2, 6, 23, 0.42) !important;
+}
+ul[role="listbox"] li:hover,
+div[role="option"]:hover,
+[data-baseweb="menu"] li:hover {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+}
+ul[role="listbox"] li[aria-selected="true"],
+div[role="option"][aria-selected="true"] {
+    background-color: #334155 !important;
+    color: #ffffff !important;
 }
 .stSlider label, .stSlider span {
     color: #ffffff !important;
@@ -691,7 +718,7 @@ def build_pdf_report(
 
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
-        "MacroHubTitle",
+        "EconAtlasTitle",
         parent=styles["Title"],
         fontName=font_name,
         fontSize=20,
@@ -700,7 +727,7 @@ def build_pdf_report(
         spaceAfter=16,
     )
     h_style = ParagraphStyle(
-        "MacroHubHeading",
+        "EconAtlasHeading",
         parent=styles["Heading2"],
         fontName=font_name,
         fontSize=14,
@@ -710,7 +737,7 @@ def build_pdf_report(
         spaceAfter=8,
     )
     body_style = ParagraphStyle(
-        "MacroHubBody",
+        "EconAtlasBody",
         parent=styles["BodyText"],
         fontName=font_name,
         fontSize=10.5,
@@ -721,7 +748,7 @@ def build_pdf_report(
 
     story = []
     story.append(Paragraph(title, title_style))
-    story.append(Paragraph("报告由 MacroHub 全球宏观经济指标数据要素服务平台自动生成", body_style))
+    story.append(Paragraph("报告由 EconAtlas 全球宏观经济指标数据要素服务平台自动生成", body_style))
     story.append(Spacer(1, 8))
 
     story.append(Paragraph("一、报告摘要", h_style))
@@ -922,7 +949,7 @@ if "value" in df_all.columns:
     df_all["value"] = pd.to_numeric(df_all["value"], errors="coerce")
 df_all["date"] = df_all["date"].astype(str)
 
-st.title("MacroHub 全球宏观经济指标数据要素服务平台")
+st.title("EconAtlas 全球宏观经济指标数据要素服务平台")
 st.caption("多源采集 · 指标标准化 · 元数据治理 · JSON 结构化输出")
 
 
@@ -1300,7 +1327,7 @@ with tab6:
     fig_cov.update_layout(plot_bgcolor="#0f172a", paper_bgcolor="#0f172a", font_color="#e5e7eb")
     st.plotly_chart(fig_cov, use_container_width=True)
 
-    st.info("MacroHub 已实现多源宏观经济数据采集、标准指标统一治理、数据缺失检测、多源一致性分析、数据质量评分、元数据管理、JSON 结构化服务输出和可视化分析。")
+    st.info("EconAtlas 已实现多源宏观经济数据采集、标准指标统一治理、数据缺失检测、多源一致性分析、数据质量评分、元数据管理、JSON 结构化服务输出和可视化分析。")
 
 
 # =========================
@@ -1432,7 +1459,7 @@ with tab9:
     }
     st.json(sample_json)
 
-    st.success("通过 API 服务中心，MacroHub 不仅能够实现可视化查询，还能够以标准化 JSON 格式对外提供数据服务。")
+    st.success("通过 API 服务中心，EconAtlas 不仅能够实现可视化查询，还能够以标准化 JSON 格式对外提供数据服务。")
 
 
 # =========================
@@ -1574,7 +1601,7 @@ with tab13:
 
 ## 一、报告摘要
 
-本报告基于 MacroHub 全球宏观经济指标数据要素服务平台，对 **{country_name}（{report_country}）** 的 **{indicator_name}（{report_indicator}）** 进行趋势分析、风险识别与数据治理说明。数据来源包括：**{source_text}**。
+本报告基于 EconAtlas 全球宏观经济指标数据要素服务平台，对 **{country_name}（{report_country}）** 的 **{indicator_name}（{report_indicator}）** 进行趋势分析、风险识别与数据治理说明。数据来源包括：**{source_text}**。
 
 ## 二、核心统计
 
@@ -1609,7 +1636,7 @@ with tab13:
 平台已对 IMF、World Bank 等来源数据进行标准化治理，包括指标编码统一、频率统一、单位统一、元数据保留、多源一致性分析和 JSON/API 结构化输出。
 
 ---
-报告由 MacroHub 自动生成。
+报告由 EconAtlas 自动生成。
 """
 
         st.markdown("### 报告预览")
@@ -1646,7 +1673,7 @@ with tab13:
             pdf_bytes = build_pdf_report(
                 title=pdf_title,
                 summary=(
-                    f"本报告基于 MacroHub 全球宏观经济指标数据要素服务平台，对 "
+                    f"本报告基于 EconAtlas 全球宏观经济指标数据要素服务平台，对 "
                     f"{country_name}（{report_country}）的 {indicator_name}（{report_indicator}）"
                     f"进行趋势分析、风险识别与数据治理说明。数据来源包括：{source_text}。"
                 ),
@@ -1877,10 +1904,4 @@ with tab15:
         )
 
         st.success("该模块将指标映射从单纯人工维护升级为“系统推荐 + 置信评分 + 人工复核”的人机协同治理流程。")
-
-
-
-
-
-
 
