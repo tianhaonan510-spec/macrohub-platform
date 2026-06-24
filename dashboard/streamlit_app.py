@@ -973,28 +973,62 @@ source_meta = {
 }
 
 
+def _short_text(value, max_len: int = 22) -> str:
+    text = "" if pd.isna(value) else str(value)
+    return text if len(text) <= max_len else text[:max_len] + "..."
+
+
 def country_label(code: str) -> str:
     meta = country_meta.get(code, {})
     zh = meta.get("country_name_zh") or code
-    en = meta.get("country_name_en") or code
-    return f"{code}｜{zh}｜{en}"
+    return f"{zh} ({code})"
 
 
 def indicator_label(code: str) -> str:
     meta = indicator_meta.get(code, {})
     zh = meta.get("indicator_name_zh") or code
-    en = meta.get("indicator_name_en") or code
-    unit = meta.get("unit")
-    suffix = f"｜{unit}" if pd.notna(unit) and str(unit).strip() else ""
-    return f"{code}｜{zh}｜{en}{suffix}"
+    return f"{_short_text(zh, 18)} ({code})"
 
 
 def frequency_label(code: str) -> str:
-    return f"{code}｜{frequency_meta.get(code, code)}"
+    zh = {"A": "年度", "Q": "季度", "M": "月度", "D": "日度"}.get(code, code)
+    return f"{zh} ({code})"
 
 
 def source_label(source: str) -> str:
-    return source_meta.get(source, source)
+    short_names = {
+        "全部": "全部来源",
+        "World Bank": "世界银行",
+        "IMF": "IMF",
+        "FRED": "FRED",
+        "OECD": "OECD",
+        "Eurostat": "Eurostat",
+        "ECB": "欧洲央行",
+        "BIS": "BIS",
+        "National Bureau of Statistics of China": "中国国家统计局",
+    }
+    return short_names.get(source, source)
+
+
+def selection_caption(country: str, indicator: str, frequency: str, source: str) -> None:
+    country_info = country_meta.get(country, {})
+    indicator_info = indicator_meta.get(indicator, {})
+    country_zh = country_info.get("country_name_zh") or country
+    country_en = country_info.get("country_name_en") or country
+    indicator_zh = indicator_info.get("indicator_name_zh") or indicator
+    indicator_en = indicator_info.get("indicator_name_en") or indicator
+    unit = indicator_info.get("unit") or ""
+    source_full = source_label(source) if source == "全部" else f"{source_label(source)}（{source}）"
+    parts = [
+        f"{country_zh}（{country} / {country_en}）",
+        f"{indicator_zh}（{indicator} / {indicator_en}）",
+    ]
+    if frequency:
+        parts.append(frequency_label(frequency))
+    parts.append(source_full)
+    if str(unit).strip():
+        parts.append(f"单位：{unit}")
+    st.caption("当前选择：" + " · ".join(parts))
 
 
 def csv_download_bytes(df: pd.DataFrame) -> bytes:
@@ -1030,6 +1064,7 @@ with tab1:
     indicator = c2.selectbox("标准指标", indicators, format_func=indicator_label)
     frequency = c3.selectbox("频率", frequencies, format_func=frequency_label)
     source_selected = c4.selectbox("数据来源", sources, format_func=source_label)
+    selection_caption(country, indicator, frequency, source_selected)
 
     date_num = pd.to_numeric(df_all["date"], errors="coerce").dropna()
     min_year = int(date_num.min()) if not date_num.empty else 1980
@@ -1142,6 +1177,7 @@ with tab4:
     json_indicator = c2.selectbox("指标", indicators, key="json_indicator", format_func=indicator_label)
     json_frequency = c3.selectbox("频率", frequencies, key="json_frequency", format_func=frequency_label)
     json_source = c4.selectbox("数据来源", sources, key="json_source", format_func=source_label)
+    selection_caption(json_country, json_indicator, json_frequency, json_source)
 
     df_json = query_data(df_all, json_country, json_indicator, json_frequency, json_source)
     json_output = build_json_output(df_json, json_country, json_indicator, json_frequency, json_source)
@@ -1173,6 +1209,7 @@ with tab5:
         c1, c2 = st.columns(2)
         compare_country = c1.selectbox("国家", countries, key="compare_country", format_func=country_label)
         compare_indicator = c2.selectbox("标准指标", multi_source_indicators, key="compare_indicator", format_func=indicator_label)
+        selection_caption(compare_country, compare_indicator, "", "全部")
 
         df_compare = df_all[
             (df_all["country_code"] == compare_country)
@@ -1462,6 +1499,7 @@ with tab12:
     ai_indicator = c2.selectbox("标准指标", indicators, key="ai_indicator", format_func=indicator_label)
     ai_frequency = c3.selectbox("频率", frequencies, key="ai_frequency", format_func=frequency_label)
     ai_source = c4.selectbox("数据来源", sources, key="ai_source", format_func=source_label)
+    selection_caption(ai_country, ai_indicator, ai_frequency, ai_source)
 
     ai_df = query_data(df_all, ai_country, ai_indicator, ai_frequency, ai_source)
     valid_ai_df = ai_df.dropna(subset=["value"]).copy()
@@ -1502,6 +1540,7 @@ with tab13:
     report_indicator = c2.selectbox("标准指标", indicators, key="report_indicator", format_func=indicator_label)
     report_frequency = c3.selectbox("频率", frequencies, key="report_frequency", format_func=frequency_label)
     report_source = c4.selectbox("数据来源", sources, key="report_source", format_func=source_label)
+    selection_caption(report_country, report_indicator, report_frequency, report_source)
 
     report_df = query_data(df_all, report_country, report_indicator, report_frequency, report_source)
     report_valid = report_df.dropna(subset=["value"]).copy()
@@ -1827,5 +1866,8 @@ with tab15:
         )
 
         st.success("该模块将指标映射从单纯人工维护升级为“系统推荐 + 置信评分 + 人工复核”的人机协同治理流程。")
+
+
+
 
 
