@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 from typing import Any, Optional
 
 from fastapi import FastAPI, Query
@@ -23,7 +23,7 @@ class BatchQueryRequest(BaseModel):
 
 
 app = FastAPI(
-    title="MacroHub 全球宏观经济指标数据要素服务",
+    title="EconAtlas 全球宏观经济指标数据要素服务",
     version="1.2.0",
     description="面向全球宏观经济指标的数据采集、标准化治理与结构化 JSON API 服务。",
 )
@@ -40,7 +40,7 @@ app.add_middleware(
 @app.get("/")
 def home() -> dict[str, Any]:
     return {
-        "name": "MacroHub",
+        "name": "EconAtlas",
         "description": "全球宏观经济指标数据要素采集、标准化治理与结构化服务平台",
         "version": "1.2.0",
         "db_path": str(DB_PATH),
@@ -90,11 +90,11 @@ def metadata() -> dict[str, Any]:
 
 @app.get("/query")
 def query_macro(
-    country: str = Query(..., description="国家/地区代码，例如 US、CN、AR"),
-    indicator: str = Query(..., description="标准指标编码，例如 CPI_YOY_A"),
-    start: Optional[str] = Query(None, description="开始日期或年份，例如 2015、2020-01"),
-    end: Optional[str] = Query(None, description="结束日期或年份，例如 2024、2024-12"),
-    frequency: Optional[str] = Query(None, description="频率代码，例如 A、Q、M"),
+    country: str = Query(..., description="国家或地区代码，例如 US、CN、AR"),
+    indicator: str = Query(..., description="标准指标代码，例如 CPI_YOY_A"),
+    start: Optional[str] = Query(None, description="开始日期或年份，例如 2015 或 2020-01"),
+    end: Optional[str] = Query(None, description="结束日期或年份，例如 2024 或 2024-12"),
+    frequency: Optional[str] = Query(None, description="频率代码，例如 D、M、Q、A"),
     source: Optional[str] = Query(None, description="数据来源，例如 IMF、World Bank、FRED"),
 ) -> dict[str, Any]:
     try:
