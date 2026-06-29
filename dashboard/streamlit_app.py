@@ -38,6 +38,7 @@ try:
     from reportlab.lib import colors
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.pdfbase.cidfonts import UnicodeCIDFont
     REPORTLAB_AVAILABLE = True
 except Exception:
     REPORTLAB_AVAILABLE = False
@@ -667,15 +668,16 @@ def build_alerts(df_all: pd.DataFrame) -> pd.DataFrame:
 
 
 def get_chinese_pdf_font() -> str:
-    """Register a Chinese font for ReportLab when available."""
+    """Register a Chinese-capable font for ReportLab when available."""
     if not REPORTLAB_AVAILABLE:
         return "Helvetica"
 
     font_candidates = [
-        r"C:\Windows\Fonts\msyh.ttc",
         r"C:\Windows\Fonts\simhei.ttf",
-        r"C:\Windows\Fonts\simsun.ttc",
+        r"C:\Windows\Fonts\simsunb.ttf",
         r"C:\Windows\Fonts\msyh.ttf",
+        r"C:\Windows\Fonts\msyh.ttc",
+        r"C:\Windows\Fonts\simsun.ttc",
     ]
 
     for font_path in font_candidates:
@@ -687,7 +689,11 @@ def get_chinese_pdf_font() -> str:
             except Exception:
                 continue
 
-    return "Helvetica"
+    try:
+        pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
+        return "STSong-Light"
+    except Exception:
+        return "Helvetica"
 
 
 def build_pdf_report(
@@ -1904,4 +1910,5 @@ with tab15:
         )
 
         st.success("该模块将指标映射从单纯人工维护升级为“系统推荐 + 置信评分 + 人工复核”的人机协同治理流程。")
+
 
