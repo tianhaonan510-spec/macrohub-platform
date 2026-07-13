@@ -65,6 +65,8 @@ st.set_page_config(
     layout="wide"
 )
 
+st.warning("旧版备份页面：请优先运行 dashboard/streamlit_app.py 或 dashboard/bigscreen_app.py；本文件仅用于历史回溯，避免作为当前平台入口。")
+
 
 # =========================
 # 科技风 CSS

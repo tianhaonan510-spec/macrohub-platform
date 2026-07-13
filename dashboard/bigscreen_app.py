@@ -12,6 +12,7 @@ import json
 import math
 import sqlite3
 from datetime import datetime
+from io import BytesIO
 from pathlib import Path
 from urllib.parse import quote
 
@@ -19,6 +20,20 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+
+try:
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import cm
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+    REPORTLAB_AVAILABLE = True
+except Exception:
+    REPORTLAB_AVAILABLE = False
 
 
 BASE_DIR = Path(__file__).resolve().parents[1]
@@ -146,6 +161,119 @@ def compact_number(value) -> str:
     if abs_value >= 1e4:
         return f"{value / 1e4:.2f}万"
     return f"{value:.2f}"
+
+
+def short_text(value, max_len: int = 18) -> str:
+    text = "" if pd.isna(value) else str(value)
+    return text if len(text) <= max_len else text[:max_len] + "..."
+
+
+def csv_download_bytes(df: pd.DataFrame) -> bytes:
+    return df.to_csv(index=False).encode("utf-8-sig")
+
+
+def get_chinese_pdf_font() -> str:
+    if not REPORTLAB_AVAILABLE:
+        return "Helvetica"
+
+    font_candidates = [
+        "/System/Library/Fonts/PingFang.ttc",
+        "/System/Library/Fonts/STHeiti Light.ttc",
+        "/System/Library/Fonts/STHeiti Medium.ttc",
+        "/Library/Fonts/Arial Unicode.ttf",
+        "/System/Library/Fonts/Supplemental/Songti.ttc",
+        r"C:\Windows\Fonts\msyh.ttc",
+        r"C:\Windows\Fonts\simsun.ttc",
+    ]
+    for font_path in font_candidates:
+        path = Path(font_path)
+        if path.exists():
+            try:
+                pdfmetrics.registerFont(TTFont("EconAtlasCN", str(path)))
+                return "EconAtlasCN"
+            except Exception:
+                continue
+
+    try:
+        pdfmetrics.registerFont(UnicodeCIDFont("STSong-Light"))
+        return "STSong-Light"
+    except Exception:
+        return "Helvetica"
+
+
+def build_pdf_report(title: str, summary: str, stats_rows: list[list[str]], governance_note: str) -> bytes:
+    if not REPORTLAB_AVAILABLE:
+        raise RuntimeError("当前环境未安装 reportlab，暂无法生成 PDF。")
+
+    buffer = BytesIO()
+    font_name = get_chinese_pdf_font()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=1.6 * cm,
+        leftMargin=1.6 * cm,
+        topMargin=1.6 * cm,
+        bottomMargin=1.6 * cm,
+    )
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        "EconAtlasTitle",
+        parent=styles["Title"],
+        fontName=font_name,
+        fontSize=19,
+        leading=27,
+        textColor=colors.HexColor("#0f172a"),
+        spaceAfter=14,
+    )
+    h_style = ParagraphStyle(
+        "EconAtlasHeading",
+        parent=styles["Heading2"],
+        fontName=font_name,
+        fontSize=13,
+        leading=20,
+        textColor=colors.HexColor("#1d4ed8"),
+        spaceBefore=12,
+        spaceAfter=8,
+    )
+    body_style = ParagraphStyle(
+        "EconAtlasBody",
+        parent=styles["BodyText"],
+        fontName=font_name,
+        fontSize=10.5,
+        leading=18,
+        textColor=colors.HexColor("#111827"),
+        spaceAfter=8,
+    )
+
+    story = [
+        Paragraph(title, title_style),
+        Paragraph("报告由 EconAtlas 全球宏观经济指标数据要素服务平台自动生成", body_style),
+        Spacer(1, 8),
+        Paragraph("一、报告摘要", h_style),
+        Paragraph(summary, body_style),
+        Paragraph("二、核心统计", h_style),
+    ]
+    table = Table([["项目", "内容"]] + stats_rows, colWidths=[4.2 * cm, 11 * cm])
+    table.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (-1, -1), font_name),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1d4ed8")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#cbd5e1")),
+        ("BACKGROUND", (0, 1), (-1, -1), colors.HexColor("#f8fafc")),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+    ]))
+    story.extend([
+        table,
+        Paragraph("三、数据治理说明", h_style),
+        Paragraph(governance_note, body_style),
+    ])
+    doc.build(story)
+    buffer.seek(0)
+    return buffer.getvalue()
 
 
 def build_asset_rating(df: pd.DataFrame) -> pd.DataFrame:
@@ -500,6 +628,34 @@ def render_module_page(
     consistency_df = load_clean_csv("quality_consistency_report.csv")
     coverage_df = load_clean_csv("quality_coverage_report.csv")
     outlier_df = load_clean_csv("quality_outlier_report.csv")
+    country_meta = (
+        df_all[["country_code", "country_name_zh", "country_name_en"]]
+        .dropna(subset=["country_code"])
+        .drop_duplicates("country_code")
+        .set_index("country_code")
+        .to_dict("index")
+    )
+    indicator_meta = (
+        df_all[["indicator_code", "indicator_name_zh", "indicator_name_en", "unit"]]
+        .dropna(subset=["indicator_code"])
+        .drop_duplicates("indicator_code")
+        .set_index("indicator_code")
+        .to_dict("index")
+    )
+
+    def country_label(code: str) -> str:
+        meta = country_meta.get(code, {})
+        zh = meta.get("country_name_zh") or code
+        return f"{zh} ({code})"
+
+    def indicator_label(code: str) -> str:
+        meta = indicator_meta.get(code, {})
+        zh = meta.get("indicator_name_zh") or code
+        return f"{short_text(zh, 18)} ({code})"
+
+    def frequency_label(code: str) -> str:
+        zh = {"A": "年度", "Q": "季度", "M": "月度", "D": "日度"}.get(code, code)
+        return f"{zh} ({code})"
 
     descriptions = {
         "指标查询": "按国家、指标、频率和来源进行统一查询，输出趋势图与标准化观测表。",
@@ -525,13 +681,13 @@ def render_module_page(
         indicators = sorted(df_all["indicator_code"].dropna().unique().tolist())
         freqs = sorted(df_all["frequency"].dropna().unique().tolist())
         c1, c2, c3 = st.columns([1, 1.4, .8])
-        country = c1.selectbox("国家/地区", countries, index=countries.index("CN") if "CN" in countries else 0)
-        indicator = c2.selectbox("标准指标", indicators, index=indicators.index("CPI_YOY_M") if "CPI_YOY_M" in indicators else 0)
-        frequency = c3.selectbox("频率", freqs, index=freqs.index("M") if "M" in freqs else 0)
+        country = c1.selectbox("国家/地区", countries, index=countries.index("CN") if "CN" in countries else 0, format_func=country_label)
+        indicator = c2.selectbox("标准指标", indicators, index=indicators.index("CPI_YOY_M") if "CPI_YOY_M" in indicators else 0, format_func=indicator_label)
+        frequency = c3.selectbox("频率", freqs, index=freqs.index("M") if "M" in freqs else 0, format_func=frequency_label)
         query_df = df_all[(df_all["country_code"] == country) & (df_all["indicator_code"] == indicator) & (df_all["frequency"] == frequency)].copy()
         query_df = query_df.dropna(subset=["value"]).sort_values("date")
         st.markdown('<div class="panel module-panel">', unsafe_allow_html=True)
-        section_title("查询结果趋势", f"{country} · {indicator}")
+        section_title("查询结果趋势", f"{country_label(country)} · {indicator_label(indicator)} · {frequency_label(frequency)}")
         if query_df.empty:
             st.warning("当前条件下暂无数据。")
         else:
@@ -694,11 +850,13 @@ def render_module_page(
         countries = sorted(df_all["country_code"].dropna().unique().tolist())
         indicators = sorted(df_all["indicator_code"].dropna().unique().tolist())
         c1, c2 = st.columns([.8, 1.2])
-        country = c1.selectbox("分析国家/地区", countries, index=countries.index("CN") if "CN" in countries else 0)
-        indicator = c2.selectbox("分析指标", indicators, index=indicators.index("CPI_YOY_M") if "CPI_YOY_M" in indicators else 0)
+        country = c1.selectbox("分析国家/地区", countries, index=countries.index("CN") if "CN" in countries else 0, format_func=country_label)
+        indicator = c2.selectbox("分析指标", indicators, index=indicators.index("CPI_YOY_M") if "CPI_YOY_M" in indicators else 0, format_func=indicator_label)
         data = latest_series(df_all, country, indicator)
+        country_display = country_label(country)
+        indicator_display = indicator_label(indicator)
         st.markdown('<div class="panel module-panel">', unsafe_allow_html=True)
-        section_title(module, f"{country} · {indicator}")
+        section_title(module, f"{country_display} · {indicator_display}")
         if data.empty:
             st.warning("当前条件暂无可分析数据。")
         else:
@@ -706,16 +864,103 @@ def render_module_page(
             latest_value = recent["value"].iloc[-1]
             first_value = recent["value"].iloc[0]
             trend = "上升" if latest_value > first_value else ("下降" if latest_value < first_value else "平稳")
+            unit = indicator_meta.get(indicator, {}).get("unit") or ""
+            source_text = "、".join(sorted(recent["source_organization"].dropna().astype(str).unique()))
             fig = px.line(recent, x="date", y="value", color="source_organization", markers=True)
             st.plotly_chart(style_plotly(fig, 360), width="stretch", config={"displayModeBar": False})
             report = (
-                f"系统识别 {country} 的 {indicator} 最近 {len(recent)} 条有效观测整体呈现{trend}态势。"
-                f"最新值为 {fmt_float(latest_value)}，样本均值为 {fmt_float(recent['value'].mean())}。"
+                f"系统识别 {country_display} 的 {indicator_display} 最近 {len(recent)} 条有效观测整体呈现{trend}态势。"
+                f"最新值为 {fmt_float(latest_value)}{unit}，样本均值为 {fmt_float(recent['value'].mean())}{unit}。"
                 "建议结合来源口径、发布时间和多源一致性报告进行交叉判断。"
             )
             st.info(report)
             if module == "智能报告":
-                st.markdown(f"### {country} {indicator} 智能分析报告\n\n{report}\n\n数据来源：{', '.join(sorted(recent['source_organization'].dropna().unique()))}")
+                report_md = f"""# {country_display} {indicator_display} 智能分析报告
+
+## 一、报告摘要
+
+本报告基于 EconAtlas 全球宏观经济指标数据要素服务平台，对 **{country_display}** 的 **{indicator_display}** 进行趋势分析、风险识别与数据治理说明。数据来源包括：**{source_text}**。
+
+## 二、核心统计
+
+- 指标代码：{indicator}
+- 数据来源：{source_text}
+- 有效观测数量：{len(recent)}
+- 时间范围：{recent["date"].iloc[0]}—{recent["date"].iloc[-1]}
+- 最新值：{fmt_float(latest_value)}{unit}
+- 历史均值：{fmt_float(recent["value"].mean())}{unit}
+- 历史最大值：{fmt_float(recent["value"].max())}{unit}
+- 历史最小值：{fmt_float(recent["value"].min())}{unit}
+
+## 三、智能解读
+
+{report}
+
+## 四、数据治理说明
+
+平台已对多来源宏观经济数据进行标准化治理，包括指标编码统一、频率统一、单位统一、元数据保留、多源一致性分析和结构化服务输出。
+
+---
+报告由 EconAtlas 自动生成。
+"""
+                st.markdown("### 报告预览")
+                st.markdown(report_md)
+                b1, b2, b3, b4 = st.columns(4)
+                governance_note = "平台已对多来源宏观经济数据进行标准化治理，包括指标编码统一、频率统一、单位统一、元数据保留、多源一致性分析和结构化服务输出。"
+                stats_rows = [
+                    ["指标代码", indicator],
+                    ["数据来源", source_text],
+                    ["有效观测数量", str(len(recent))],
+                    ["时间范围", f"{recent['date'].iloc[0]}—{recent['date'].iloc[-1]}"],
+                    ["最新值", f"{fmt_float(latest_value)}{unit}"],
+                    ["历史均值", f"{fmt_float(recent['value'].mean())}{unit}"],
+                    ["历史最大值", f"{fmt_float(recent['value'].max())}{unit}"],
+                    ["历史最小值", f"{fmt_float(recent['value'].min())}{unit}"],
+                ]
+                if REPORTLAB_AVAILABLE:
+                    pdf_bytes = build_pdf_report(
+                        title=f"{country_display} {indicator_display} 智能分析报告",
+                        summary=report,
+                        stats_rows=stats_rows,
+                        governance_note=governance_note,
+                    )
+                    b1.download_button(
+                        "下载 PDF 报告",
+                        data=pdf_bytes,
+                        file_name=f"{country}_{indicator}_report.pdf",
+                        mime="application/pdf",
+                    )
+                else:
+                    b1.warning("当前环境未安装 reportlab，暂无法生成 PDF。")
+                b2.download_button(
+                    "下载 Markdown 报告",
+                    data=report_md,
+                    file_name=f"{country}_{indicator}_report.md",
+                    mime="text/markdown",
+                )
+                report_json = {
+                    "country": country,
+                    "country_label": country_display,
+                    "indicator": indicator,
+                    "indicator_label": indicator_display,
+                    "latest_value": float(latest_value),
+                    "mean_value": float(recent["value"].mean()),
+                    "trend": trend,
+                    "sources": source_text,
+                    "summary": report,
+                }
+                b3.download_button(
+                    "下载 JSON 报告",
+                    data=json.dumps(report_json, ensure_ascii=False, indent=2),
+                    file_name=f"{country}_{indicator}_report.json",
+                    mime="application/json",
+                )
+                b4.download_button(
+                    "下载报告数据 CSV",
+                    data=csv_download_bytes(recent),
+                    file_name=f"{country}_{indicator}_report_data.csv",
+                    mime="text/csv",
+                )
         st.markdown("</div>", unsafe_allow_html=True)
         return
 
@@ -770,6 +1015,28 @@ st.markdown(
     .block-container { padding: .35rem 1.05rem 1.05rem; max-width: 100%; }
     #MainMenu, footer, header, [data-testid="stToolbar"] { visibility: hidden; height: 0; }
     div[data-testid="stVerticalBlock"] { gap: .75rem; }
+    div[data-testid="stDownloadButton"] button {
+        width: 100%;
+        min-height: 46px;
+        border: 1px solid rgba(34, 211, 238, .78) !important;
+        border-radius: 8px !important;
+        background:
+            linear-gradient(135deg, rgba(37, 99, 235, .96), rgba(14, 165, 233, .78)) !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        box-shadow: 0 0 18px rgba(34, 211, 238, .28), inset 0 0 14px rgba(255, 255, 255, .10);
+    }
+    div[data-testid="stDownloadButton"] button p,
+    div[data-testid="stDownloadButton"] button span {
+        color: #ffffff !important;
+        font-weight: 800 !important;
+    }
+    div[data-testid="stDownloadButton"] button:hover {
+        border-color: rgba(255, 255, 255, .92) !important;
+        background:
+            linear-gradient(135deg, rgba(59, 130, 246, 1), rgba(34, 211, 238, .92)) !important;
+        box-shadow: 0 0 24px rgba(34, 211, 238, .42), inset 0 0 18px rgba(255, 255, 255, .14);
+    }
     .screen-frame {
         position: fixed;
         inset: 7px;
