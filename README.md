@@ -17,7 +17,9 @@ EconAtlas 面向“全球宏观经济指标数据要素采集与结构化服务�
 - `standardizer/`：标准化处理模块
 - `services/`：查询服务逻辑
 - `api_service/app.py`：FastAPI 接口
-- `dashboard/streamlit_app.py`：Streamlit 可视化平台
+- `dashboard/streamlit_app.py`：Streamlit Cloud 入口，默认进入新版 EconAtlas 大屏
+- `dashboard/full_platform_app.py`：完整平台旧版入口
+- `dashboard/bigscreen_app.py`：新版 EconAtlas 数据要素大屏
 - `metadata/`：指标字典、来源映射、国家字典、运行清单、对齐候选结果
 - `data_clean/macro_observations.csv`：标准化长表
 - `data_clean/macrohub.db`：SQLite 数据库，文件名沿用开发阶段命名，实际承载 EconAtlas 平台标准化数据
@@ -104,7 +106,13 @@ http://127.0.0.1:8000/docs
 streamlit run dashboard/streamlit_app.py
 ```
 
-平台包含指标查询、指标字典、数据质量、JSON 输出、一致性分析、治理驾驶舱、指标血缘、治理规则、API 服务中心、数据资产目录、风险预警、智能分析、智能报告、资产评级和指标对齐审核等模块。
+默认进入新版 EconAtlas 数据要素大屏。若需查看完整平台旧版入口，可运行：
+
+```bash
+streamlit run dashboard/full_platform_app.py
+```
+
+完整平台包含指标查询、指标字典、数据质量、JSON 输出、一致性分析、治理驾驶舱、指标血缘、治理规则、API 服务中心、数据资产目录、风险预警、智能分析、智能报告、资产评级和指标对齐审核等模块。
 
 ## 半自动指标对齐审核
 
