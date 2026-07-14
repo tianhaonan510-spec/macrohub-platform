@@ -15,6 +15,7 @@ from datetime import datetime
 from io import BytesIO
 from pathlib import Path
 from urllib.parse import quote
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import plotly.express as px
@@ -538,7 +539,11 @@ def module_dock(selected_module: str = "") -> None:
     module_links = []
     for name in MODULES:
         active = " active" if name == selected_module else ""
-        module_links.append(f'<a class="{active.strip()}" href="?module={quote(name)}">{name}</a>')
+        current = ' aria-current="page"' if name == selected_module else ""
+        module_links.append(
+            f'<a class="{active.strip()}"{current} '
+            f'href="?page=platform&amp;module={quote(name)}">{name}</a>'
+        )
     module_html = "".join(module_links)
     st.markdown(
         f"""
@@ -554,11 +559,10 @@ def module_dock(selected_module: str = "") -> None:
               </div>
             </div>
           </div>
-          <div class="module-dock-links">
-            <a class="primary" href="?">返回大屏首页</a>
+          <nav class="module-dock-links" aria-label="平台模块导航">
+            <a class="primary" href="?page=platform">返回大屏首页</a>
             {module_html}
-            <a href="http://localhost:8501" target="_blank">旧版完整平台</a>
-          </div>
+          </nav>
         </div>
         """,
         unsafe_allow_html=True,
@@ -601,11 +605,41 @@ def module_title(name: str, desc: str) -> None:
             <h2>{name}</h2>
             <p>{desc}</p>
           </div>
-          <a href="?">返回大屏首页</a>
+          <a href="?page=platform">返回大屏首页</a>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
+
+def render_status_row(status_text: str, finished_at: str) -> None:
+    """Render the status row with the current China Standard Time."""
+    now = datetime.now(ZoneInfo("Asia/Shanghai"))
+    display_time = now.strftime("%Y-%m-%d %H:%M:%S")
+    iso_time = now.isoformat(timespec="seconds")
+    st.markdown(
+        f"""
+        <div class="status-row">
+          <div>数据源状态：{status_text} · 最近记录：{finished_at}</div>
+          <div>系统当前时间（北京时间）· <time datetime="{iso_time}">{display_time}</time></div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_live_status_row(status_text: str, finished_at: str) -> None:
+    """Refresh only the display clock when the installed Streamlit supports fragments."""
+    fragment = getattr(st, "fragment", None)
+    if fragment is None:
+        render_status_row(status_text, finished_at)
+        return
+
+    @fragment(run_every="1s")
+    def live_status() -> None:
+        render_status_row(status_text, finished_at)
+
+    live_status()
 
 
 def latest_series(df: pd.DataFrame, country: str, indicator: str) -> pd.DataFrame:
@@ -1500,7 +1534,6 @@ warning_count = 0
 if not quality_report.empty and "status" in quality_report.columns:
     warning_count = int((quality_report["status"].astype(str) == "warning").sum())
 
-topbar_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 status_text = update_status.get("status", "local")
 finished_at = update_status.get("finished_at", "本地标准库")
 selected_module = get_selected_module()
@@ -1513,13 +1546,10 @@ st.markdown(
         <p>Global Macro Data Asset Command Center</p>
       </div>
     </div>
-    <div class="status-row">
-      <div>数据源状态：{status_text} · 最近记录：{finished_at}</div>
-      <div>本地大屏预览 · {topbar_time}</div>
-    </div>
     """,
     unsafe_allow_html=True,
 )
+render_live_status_row(status_text, finished_at)
 module_dock(selected_module)
 
 if selected_module:
