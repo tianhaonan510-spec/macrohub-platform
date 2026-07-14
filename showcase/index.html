@@ -795,8 +795,8 @@
       inset: 0;
       display: none;
       place-items: center;
-      padding: 28px;
-      background: rgba(4, 14, 32, 0.72);
+      padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+      background: rgba(4, 14, 32, 0.82);
       z-index: 60;
     }
 
@@ -805,22 +805,25 @@
     }
 
     .modal-box {
-      width: min(1080px, 96vw);
-      border-radius: 16px;
+      width: min(960px, calc(100vw - 24px));
+      max-height: calc(100dvh - 24px);
+      display: flex;
+      flex-direction: column;
+      border-radius: 14px;
       overflow: hidden;
-      background: #fff;
+      background: #071a38;
       box-shadow: 0 28px 86px rgba(0, 0, 0, 0.32);
     }
 
     .modal-head {
-      height: 58px;
+      min-height: 50px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 20px;
-      color: var(--ink);
+      color: #f6fbff;
       font-weight: 900;
-      border-bottom: 1px solid var(--line);
+      border-bottom: 1px solid rgba(117, 191, 255, 0.28);
     }
 
     .close {
@@ -837,7 +840,37 @@
     video {
       display: block;
       width: 100%;
+      max-height: calc(100dvh - 74px);
+      aspect-ratio: 16 / 9;
+      object-fit: contain;
       background: #000;
+    }
+
+    @media (max-width: 760px) {
+      .modal {
+        padding: 10px;
+      }
+
+      .modal-box {
+        width: 100%;
+        max-height: calc(100dvh - 20px);
+        border-radius: 12px;
+      }
+
+      .modal-head {
+        min-height: 46px;
+        padding: 0 14px;
+        font-size: 14px;
+      }
+
+      .close {
+        width: 32px;
+        height: 32px;
+      }
+
+      video {
+        max-height: calc(100dvh - 66px);
+      }
     }
 
     @keyframes pulse {
@@ -1175,9 +1208,9 @@
   </div>
 
   <div class="modal" id="videoModal" aria-hidden="true">
-    <div class="modal-box" role="dialog" aria-modal="true" aria-label="平台宣传视频">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="videoModalTitle" tabindex="-1">
       <div class="modal-head">
-        <span>EconAtlas 平台宣传视频</span>
+        <span id="videoModalTitle">EconAtlas 平台宣传视频</span>
         <button class="close" type="button" aria-label="关闭视频" data-close-video>×</button>
       </div>
       <video
@@ -1195,13 +1228,16 @@
     const video = document.querySelector("#demoVideo");
     const openButtons = document.querySelectorAll("[data-open-video]");
     const closeButton = document.querySelector("[data-close-video]");
+    let lastFocusedElement = null;
 
     function openVideo() {
+      lastFocusedElement = document.activeElement;
       if (!video.src) {
         video.src = video.dataset.videoSrc;
       }
       modal.classList.add("is-open");
       modal.setAttribute("aria-hidden", "false");
+      closeButton.focus();
       video.play().catch(() => {});
     }
 
@@ -1209,6 +1245,7 @@
       video.pause();
       modal.classList.remove("is-open");
       modal.setAttribute("aria-hidden", "true");
+      lastFocusedElement?.focus();
     }
 
     openButtons.forEach((button) => button.addEventListener("click", openVideo));
