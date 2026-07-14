@@ -63,7 +63,26 @@ def load_showcase_html() -> str:
     html = re.sub(r"assets/[A-Za-z0-9_.-]+", asset_data_uri, html)
     html = html.replace('href="http://localhost:8508/" target="_blank"', 'href="?page=platform" target="_parent"')
     html = html.replace('href="http://localhost:8508/"', 'href="?page=platform" target="_parent"')
-    return html
+    resize_script = """
+    <script>
+      (() => {
+        const updateFrameHeight = () => {
+          const height = Math.ceil(document.documentElement.scrollHeight);
+          window.parent.postMessage({
+            isStreamlitMessage: true,
+            type: "streamlit:setFrameHeight",
+            height,
+          }, "*");
+        };
+
+        window.addEventListener("load", updateFrameHeight);
+        window.addEventListener("resize", updateFrameHeight);
+        new ResizeObserver(updateFrameHeight).observe(document.body);
+        requestAnimationFrame(updateFrameHeight);
+      })();
+    </script>
+    """
+    return html.replace("</body>", f"{resize_script}</body>")
 
 
 st.markdown(
@@ -87,4 +106,4 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-components.html(load_showcase_html(), height=7200, scrolling=False)
+components.html(load_showcase_html(), height=5600, scrolling=True)
