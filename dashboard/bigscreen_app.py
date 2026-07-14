@@ -541,7 +541,7 @@ def module_dock(selected_module: str = "") -> None:
         active = " active" if name == selected_module else ""
         current = ' aria-current="page"' if name == selected_module else ""
         module_links.append(
-            f'<a class="{active.strip()}"{current} '
+            f'<a class="{active.strip()}"{current} target="_self" '
             f'href="?page=platform&amp;module={quote(name)}">{name}</a>'
         )
     module_html = "".join(module_links)
@@ -560,7 +560,7 @@ def module_dock(selected_module: str = "") -> None:
             </div>
           </div>
           <nav class="module-dock-links" aria-label="平台模块导航">
-            <a class="primary" href="?page=platform">返回大屏首页</a>
+            <a class="primary" target="_self" href="?page=platform">返回大屏首页</a>
             {module_html}
           </nav>
         </div>
@@ -605,7 +605,7 @@ def module_title(name: str, desc: str) -> None:
             <h2>{name}</h2>
             <p>{desc}</p>
           </div>
-          <a href="?page=platform">返回大屏首页</a>
+          <a target="_self" href="?page=platform">返回大屏首页</a>
         </div>
         """,
         unsafe_allow_html=True,
